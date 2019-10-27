@@ -62,7 +62,7 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         // Extrai do paket de entrada as informacoes para a extrutura
-        // headres ue contem o MAC e o IPv4
+        // headres que contem o MAC e o IPv4
         packet.extract(hdr.ethernet);
         //Seleciona o tipo do pacote ethernet
         transition select(hdr.ethernet.etherType){
@@ -71,8 +71,10 @@ parser MyParser(packet_in packet,
         }
     }
 
-    state parse_ipv4 
-    
+    state parse_ipv4 {
+			
+	} 
+
 }
 
 
