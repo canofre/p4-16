@@ -51,7 +51,7 @@ parser MyParser(packet_in packet,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
-    /* ia opcao transition definie a acao a ser realizada
+    /* a opcao transition definie a acao a ser realizada
     * que no caso era aceitar o pacote mas poderia ser reject
     * ou o que vai ser definido para ser executado no proximo passo
     */
