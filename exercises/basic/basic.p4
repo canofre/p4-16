@@ -2,6 +2,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
+//bit<X> determina variaveis com X bits
 const bit<16> TYPE_IPV4 = 0x800;
 
 /*************************************************************************
@@ -9,13 +10,13 @@ const bit<16> TYPE_IPV4 = 0x800;
 *************************************************************************/
 
 typedef bit<9>  egressSpec_t;
-typedef bit<48> macAddr_t;
+typedef bit<48> macAddr_t; 
 typedef bit<32> ip4Addr_t;
 
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16>   etherType; 
 }
 
 header ipv4_t {
@@ -56,7 +57,9 @@ parser MyParser(packet_in packet,
     * ou o que vai ser definido para ser executado no proximo passo
     */
     state start {
-        //transition accept;
+        // transition: aceita (accept), rejeita (reject) 
+        // ou transmite o controle para outro estado, no caso parse_ethernet
+        // que poderia ter sido colocado diretamente no stado inicial
         transition parse_ethernet;
     }
 
@@ -72,7 +75,7 @@ parser MyParser(packet_in packet,
             default: accept;
         }
     }
-
+    
     state parse_ipv4 {
 		// Extrai do pacote de entrada o tipo ipv4 para o headers hdr
 		packet.extract (hdr.ipv4);
@@ -99,12 +102,18 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+    
+    //Acao definida para a tabela ipv4
     action drop() {
         mark_to_drop(standard_metadata);
     }
     
+    //Acao definida para a tabela ipv4
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        /* TODO: fill out code in action body */
+        standard_metadata.egress_spec = port;
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     
     table ipv4_lpm {
@@ -124,7 +133,9 @@ control MyIngress(inout headers hdr,
         /* TODO: fix ingress control logic
          *  - ipv4_lpm should be applied only when IPv4 header is valid
          */
-        ipv4_lpm.apply();
+        if ( hdr.ipv4.isValid() ){
+            ipv4_lpm.apply();   
+        }
     }
 }
 
@@ -143,11 +154,11 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-     apply {
-	update_checksum(
-	    hdr.ipv4.isValid(),
+    apply {
+	    update_checksum(
+	        hdr.ipv4.isValid(),
             { hdr.ipv4.version,
-	      hdr.ipv4.ihl,
+	          hdr.ipv4.ihl,
               hdr.ipv4.diffserv,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
@@ -169,7 +180,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        /* TODO: add deparser logic */
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
@@ -177,11 +189,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
 ***********************  S W I T C H  *******************************
 *************************************************************************/
 
-V1Switch(
-MyParser(),
-MyVerifyChecksum(),
-MyIngress(),
-MyEgress(),
-MyComputeChecksum(),
-MyDeparser()
-) main;
+V1Switch( MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
