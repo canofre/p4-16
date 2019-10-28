@@ -115,7 +115,51 @@
         {
           "name" : "start",
           "id" : 0,
-          "parser_ops" : [],
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ethernet"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x0800",
+              "mask" : null,
+              "next_state" : "parse_ipv4"
+            },
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "etherType"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_ipv4",
+          "id" : 1,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ipv4"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
           "transitions" : [
             {
               "value" : "default",
@@ -135,7 +179,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 145,
+        "line" : 170,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -151,7 +195,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 122,
+        "line" : 147,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
@@ -227,7 +271,7 @@
           ],
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 78,
+            "line" : 103,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -256,7 +300,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 74,
+        "line" : 99,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -267,7 +311,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "basic.p4",
-            "line" : 85,
+            "line" : 110,
             "column" : 10,
             "source_fragment" : "ipv4_lpm"
           },
@@ -309,7 +353,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 110,
+        "line" : 135,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -325,7 +369,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 122,
+        "line" : 147,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },

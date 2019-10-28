@@ -66,13 +66,18 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         //Seleciona o tipo do pacote ethernet
         transition select(hdr.ethernet.etherType){
-            TYPE_IPV4: parse_ipv4:
-            default: accept:
+			// Faz o q
+            TYPE_IPV4: parse_ipv4;
+			// Faz o q
+            default: accept;
         }
     }
 
     state parse_ipv4 {
-			
+		// Extrai do pacote de entrada o tipo ipv4 para o headers hdr
+		packet.extract (hdr.ipv4);
+		// Faz o q
+		transition accept;
 	} 
 
 }
