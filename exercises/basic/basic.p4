@@ -4,6 +4,8 @@
 
 //bit<X> determina variaveis com X bits
 const bit<16> TYPE_IPV4 = 0x800;
+const bit<16> TYPE_IPV6 = 0x86DD;
+
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -46,7 +48,9 @@ struct headers {
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
-
+/* A ordem de excrita dos estados do parser pode ser alterada no codigo e ele
+ * continua a executar sem problemas, ou seja, nao necessita ser sequencial
+*/
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
@@ -67,21 +71,27 @@ parser MyParser(packet_in packet,
         // Extrai do paket de entrada as informacoes para a extrutura
         // headres que contem o MAC e o IPv4
         packet.extract(hdr.ethernet);
-        //Seleciona o tipo do pacote ethernet
+        // Esse select e tipo sw-case, retornando o etherType que de alguma
+        // forma e comparado com o TYPE_IPV4, e sendo igual, passa para o 
+        // prosimo estado
         transition select(hdr.ethernet.etherType){
-			// Faz o q
             TYPE_IPV4: parse_ipv4;
-			// Faz o q
-            default: accept;
+			// Caso nao seja encontrato a acao default e aceitar. Para uma
+			// falta de acao padrao teria que ser definido um erro em
+			// error.NoMatch. 
+            //default: accept; //a forma alternativa escrita abaixo
+            _: accept;
         }
     }
     
     state parse_ipv4 {
 		// Extrai do pacote de entrada o tipo ipv4 para o headers hdr
 		packet.extract (hdr.ipv4);
-		// Faz o q
+		// Termina a execucao do parser atual e passa para o proximo estado 
+        // que no caso e aceito.
 		transition accept;
 	} 
+    
 
 }
 
