@@ -76,9 +76,9 @@ parser MyParser(packet_in packet,
         // prosimo estado
         transition select(hdr.ethernet.etherType){
             TYPE_IPV4: parse_ipv4;
-			// Caso nao seja encontrato a acao default e aceitar. Para uma
-			// falta de acao padrao teria que ser definido um erro em
-			// error.NoMatch. 
+            // Caso nao seja encontrato a acao default e aceitar. Para uma
+            // falta de acao padrao teria que ser definido um erro em
+            // error.NoMatch. 
             //default: accept; //a forma alternativa escrita abaixo
             _: accept;
         }
