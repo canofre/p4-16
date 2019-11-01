@@ -99,19 +99,19 @@ parser MyParser(packet_in packet,
 /*************************************************************************
 ************   C H E C K S U M    V E R I F I C A T I O N   *************
 *************************************************************************/
-
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {   
     apply {  }
 }
 
 
-/*************************************************************************
-**************  I N G R E S S   P R O C E S S I N G   *******************
-*************************************************************************/
+/*******************************************************************************
+**************  I N G R E S S   P R O C E S S I N G ****************************
+*******************************************************************************/
 
-control MyIngress(inout headers hdr,
-                  inout metadata meta,
-                  inout standard_metadata_t standard_metadata) {
+/* Esse bloco e sequencia, sendo necessario que os elementos chamados estejam
+ * descritos antes da sua chamada
+ */
+control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     
     //Acao definida para a tabela ipv4
     action drop() {
@@ -125,7 +125,11 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
-    
+    // Indica que sera consultado o Ip destido via lpm e define as acoes 
+    // possiveis. A defincao da acao a ser tomada e na tabela definiada nos 
+    // arquivos JSON. Se existir uma correspondencia uma acao e definida
+    // caso nao exista correspondencia outra acao e deficida, ver arquivos
+    // de definicao da topologia.
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -138,31 +142,32 @@ control MyIngress(inout headers hdr,
         size = 1024;
         default_action = NoAction();
     }
-    
+
     apply {
-        /* TODO: fix ingress control logic
-         *  - ipv4_lpm should be applied only when IPv4 header is valid
-         */
+        // Executa/aplica/chama a tabela ipv4_lpm se dor um ipv4 valido
         if ( hdr.ipv4.isValid() ){
             ipv4_lpm.apply();   
         }
     }
 }
 
-/*************************************************************************
-****************  E G R E S S   P R O C E S S I N G   *******************
-*************************************************************************/
-
-control MyEgress(inout headers hdr,
-                 inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
-    apply {  }
+/*******************************************************************************
+****************  E G R E S S   P R O C E S S I N G   **************************
+*******************************************************************************/
+/* Bloco de controle da saida do pacote. Esta diretamente ligado ao bloco
+ * MyEgress pois as saidas do MyIngress sao as entradas do MyEgress. 
+ * No caso esse bloco nao realiza nenhuma acao, apenas da sequencia ao fluxo
+ */
+control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+     apply {  }
 }
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
-
+/* Bloco para verificacao do hash do pacote. Utiliza a funcao update_checksum
+ * definida em v1model.
+*/
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
 	    update_checksum(
@@ -187,9 +192,10 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 /*************************************************************************
 ***********************  D E P A R S E R  *******************************
 *************************************************************************/
-
+// Remonta e despacha o pacote
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
+        // Escreve os cabecalhos no pacote de saida
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
