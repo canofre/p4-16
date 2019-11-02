@@ -65,14 +65,20 @@ const bit<8>  P4CALC_PLUS  = 0x2b;   // '+'
 const bit<8>  P4CALC_MINUS = 0x2d;   // '-'
 const bit<8>  P4CALC_AND   = 0x26;   // '&'
 const bit<8>  P4CALC_OR    = 0x7c;   // '|'
-const bit<8>  P4CALC_CARET = 0x5e;   // '^'
+const bit<8>  P4CALC_CARET = 0x5e;   // '^' Exponencial
 
-header p4calc_t {
-    bit<8>  op;
 /* TODO
  * fill p4calc_t header with P, four, ver, op, operand_a, operand_b, and res
    entries based on above protocol header definition.
  */
+header p4calc_t {
+    bit<8>  p;      // Letra P (0x50)
+    bit<8>  four;   //    
+    bit<8>  ver;    //
+    bit<8>  op;     // 
+    bit<32> var1;   // valor 1   
+    bit<32> var2;   // valor 2
+    bit<32> res;    // resultado
 }
 
 /*
@@ -113,14 +119,15 @@ parser MyParser(packet_in packet,
     
     state check_p4calc {
         /* TODO: just uncomment the following parse block */
-        /* 
+        // O que faz o lookahead
+        // Acho que verifica o cabecalho do cacote 
         transition select(packet.lookahead<p4calc_t>().p,
         packet.lookahead<p4calc_t>().four,
         packet.lookahead<p4calc_t>().ver) {
             (P4CALC_P, P4CALC_4, P4CALC_VER) : parse_p4calc;
             default                          : accept;
         }
-        */
+        
     }
     
     state parse_p4calc {
@@ -143,6 +150,7 @@ control MyVerifyChecksum(inout headers hdr,
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+    bit<32> tmp;
     action send_back(bit<32> result) {
         /* TODO
          * - put the result back in hdr.p4calc.res
@@ -151,26 +159,45 @@ control MyIngress(inout headers hdr,
          * - Send the packet back to the port it came from
              by saving standard_metadata.ingress_port into
              standard_metadata.egress_spec
-         */ 
+         */
+        bit<48> tmp_mac;
+        hdr.p4calc.res = result;
+        tmp_mac = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
+        hdr.ethernet.srcAddr = tmp_mac;
+        //Diferenca entre egress_spect e egress_port?
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+        
+  
     }
     
     action operation_add() {
+        tmp = hdr.p4calc.var1 + hdr.p4calc.var2;
+        send_back(tmp);
         /* TODO call send_back with operand_a + operand_b */
     }
     
     action operation_sub() {
+        tmp = hdr.p4calc.var1 - hdr.p4calc.var2;
+        send_back(tmp);
         /* TODO call send_back with operand_a - operand_b */
     }
     
     action operation_and() {
+        tmp = hdr.p4calc.var1 & hdr.p4calc.var2;
+        send_back(tmp);
         /* TODO call send_back with operand_a & operand_b */
     }
     
     action operation_or() {
+        tmp = hdr.p4calc.var1 | hdr.p4calc.var2;
+        send_back(tmp);
         /* TODO call send_back with operand_a | operand_b */
     }
 
     action operation_xor() {
+        tmp = hdr.p4calc.var1 ^ hdr.p4calc.var2;
+        send_back(tmp);
         /* TODO call send_back with operand_a ^ operand_b */
     }
 
