@@ -57,28 +57,39 @@ struct headers {
 *************************************************************************/
 
 // TODO: Update the parser to parse the myTunnel header as well
-parser MyParser(packet_in packet,
-                out headers hdr,
-                inout metadata meta,
-                inout standard_metadata_t standard_metadata) {
+parser MyParser(packet_in p, out headers hdr, inout metadata meta, inout standard_metadata_t smt) {
 
+    // Apenas passa para o parser_ethernet
     state start {
         transition parse_ethernet;
     }
 
+    // Extrai o header ethernet do packet de entrada para o header hdr e
+    // encaminha para o parser com cabecalho equivalente
     state parse_ethernet {
-        packet.extract(hdr.ethernet);
+        p.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
+            TYPE_MYTUNNEL : parse_mytunnel;
+            TYPE_IPV4 : parse_ipv4;
+            default : accept;
+        }
+    }
+    
+    // Estrai o header se for do tipo mytunnel e encaminha para extrair o
+    // header do tipo ipv4 se proto_id for equivalente
+    state parse_mytunnel {
+        p.extract(hdr.myTunnel);
+        transition select(hdr.myTunnel.proto_id) {
             TYPE_IPV4 : parse_ipv4;
             default : accept;
         }
     }
 
+    // Extrai o header ipv4 do pacote de entrada
     state parse_ipv4 {
-        packet.extract(hdr.ipv4);
+        p.extract(hdr.ipv4);
         transition accept;
     }
-
 
 }
 
@@ -94,16 +105,16 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
-
-control MyIngress(inout headers hdr,
-                  inout metadata meta,
-                  inout standard_metadata_t standard_metadata) {
+// As tabelas e acoes definidas aqui(ipv4_forward, ipv4_lpm...) estao
+// estaticamente definidas nos arquivos de configiuracoes do plano de controle
+// que estao armazenadas nos arquivos sx-runtime.json
+control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t smt) {
     action drop() {
-        mark_to_drop(standard_metadata);
+        mark_to_drop(smt);
     }
     
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        standard_metadata.egress_spec = port;
+        smt.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -123,15 +134,31 @@ control MyIngress(inout headers hdr,
     }
 
     // TODO: declare a new action: myTunnel_forward(egressSpec_t port)
+    // O parametro port esta definido em sx-runtime.json
+    action myTunnel_forward(egressSpec_t port){
+        smt.egress_spec = port;
+    }
 
 
     // TODO: declare a new table: myTunnel_exact
     // TODO: also remember to add table entries!
-
+    table myTunnel_exact {
+        key = {
+            hdr.myTunnel.dst_id: exact;
+        }
+        actions = {
+            myTunnel_forward;
+            drop;
+        }
+        size = 1024; //?
+        default_action = drop();    
+    }
 
     apply {
         // TODO: Update control flow
-        if (hdr.ipv4.isValid()) {
+        if (hdr.myTunnel.isValid()){
+            myTunnel_exact.apply();
+        }else if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
         }
     }
@@ -143,7 +170,7 @@ control MyIngress(inout headers hdr,
 
 control MyEgress(inout headers hdr,
                  inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
+                 inout standard_metadata_t smt) {
     apply {  }
 }
 
@@ -179,6 +206,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         // TODO: emit myTunnel header as well
+        packet.emit(hdr.myTunnel);
         packet.emit(hdr.ipv4);
     }
 }
