@@ -79,12 +79,12 @@ header p4calc_t {
     bit<32> var1;   // valor 1   
     bit<32> var2;   // valor 2
     bit<32> res;    // resultado
-    //bit<48> res;    // resultado
+    //bit<48> resb;    // resultado
 
 }
 
 header smt_t {
-    bit<7>  linguica;   //completar pacote multiplo de 8 pra compliar
+    bit<7>  tmp;   //completar pacote multiplo de 8 pra compliar
     bit<9>  smt9b;      //ingress_port, egress_port, egress_spect
     bit<32> smt32b;     //instance_type,packet_lenght,enq_timestamp,deq_timedelta
     bit<48> smt48b;     //(in/egr)_global_timestamp;
@@ -123,22 +123,10 @@ parser MyParser(packet_in packet,
     state start {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            P4CALC_ETYPE : check_p4calc;
+            //P4CALC_ETYPE : check_p4calc;
+            P4CALC_ETYPE : parse_p4calc;
             default      : accept;
         }
-    }
-    
-    state check_p4calc {
-        /* TODO: just uncomment the following parse block */
-        // O que faz o lookahead
-        // Acho que verifica o cabecalho do cacote 
-        transition select(packet.lookahead<p4calc_t>().p,
-        packet.lookahead<p4calc_t>().four,
-        packet.lookahead<p4calc_t>().ver) {
-            (P4CALC_P, P4CALC_4, P4CALC_VER) : parse_p4calc;
-            default                          : accept;
-        }
-        
     }
     
     state parse_p4calc {
