@@ -12,10 +12,6 @@
  * +----------------+----------------+----------------+---------------+
  * |      P         |       4        |     Version    |     Op        |
  * +----------------+----------------+----------------+---------------+
- * |                              Operand A                           |
- * +----------------+----------------+----------------+---------------+
- * |                              Operand B                           |
- * +----------------+----------------+----------------+---------------+
  * |                              Result                              |
  * +----------------+----------------+----------------+---------------+
  *
@@ -61,23 +57,27 @@ const bit<16> P4CALC_ETYPE = 0x1234;
 const bit<8>  P4CALC_P     = 0x50;   // 'P'
 const bit<8>  P4CALC_4     = 0x34;   // '4'
 const bit<8>  P4CALC_VER   = 0x01;   // v0.1
-const bit<8>  P4CALC_PLUS  = 0x2b;   // '+'
-const bit<8>  P4CALC_MINUS = 0x2d;   // '-'
-const bit<8>  P4CALC_AND   = 0x26;   // '&'
-const bit<8>  P4CALC_OR    = 0x7c;   // '|'
-const bit<8>  P4CALC_CARET = 0x5e;   // '^' Exponencial
+const bit<8>  OP_0     = 0x30;   // '1'
+const bit<8>  OP_1     = 0x31;   // '1'
+const bit<8>  OP_2     = 0x32;   // '2'
+const bit<8>  OP_3     = 0x33;   // '3'
+const bit<8>  OP_4     = 0x34;   // '4'
+const bit<8>  OP_5     = 0x35;   // '5' 
+const bit<8>  OP_6     = 0x36;   // '6' 
+const bit<8>  OP_7     = 0x37;   // '7' 
+const bit<8>  OP_8     = 0x38;   // '8' 
 
 /* TODO
  * fill p4calc_t header with P, four, ver, op, operand_a, operand_b, and res
  * entries based on above protocol header definition.
  */
-header p4calc_t {
+header p4get_t {
     bit<8>  p;      // Letra P (0x50)
     bit<8>  four;   //    
     bit<8>  ver;    //
     bit<8>  op;     // 
-    bit<32> var1;   // valor 1   
-    bit<32> var2;   // valor 2
+//    bit<32> var1;   // valor 1   
+//    bit<32> var2;   // valor 2
     bit<32> res;    // resultado
     //bit<48> resb;    // resultado
 
@@ -98,7 +98,7 @@ header smt_t {
  */
 struct headers {
     ethernet_t  ethernet;
-    p4calc_t    p4calc;
+    p4get_t     p4get;
     smt_t       smt_campos;        
 }
 
@@ -124,13 +124,13 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             //P4CALC_ETYPE : check_p4calc;
-            P4CALC_ETYPE : parse_p4calc;
+            P4CALC_ETYPE : parse_p4get;
             default      : accept;
         }
     }
     
-    state parse_p4calc {
-        packet.extract(hdr.p4calc);
+    state parse_p4get {
+        packet.extract(hdr.p4get);
         transition accept;
     }
 }
@@ -160,7 +160,7 @@ control MyIngress(inout headers hdr,
              standard_metadata.egress_spec
          */
         bit<48> tmp_mac;
-        hdr.p4calc.res = result;
+        hdr.p4get.res = result;
         tmp_mac = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
         hdr.ethernet.srcAddr = tmp_mac;
@@ -170,19 +170,22 @@ control MyIngress(inout headers hdr,
   
     }
     
-    action operation_add() {
+    // OP 0 
+    action get_ingress_port() {
         //9 bits
         send_back((bit<32>)smt.ingress_port);
         //send_back((bit<48>)smt.ingress_port);
     }
     
-    action operation_sub() {
+    // OP 1
+    action get_pkt_lenght() {
         //32 bits
         send_back(smt.packet_length);
         //send_back((bit<48>)smt.packet_length);
     }
     
-    action operation_and() {
+    // OP 2
+    action get_enq_timestamp() {
         //32 bits
         send_back(smt.enq_timestamp);
         //send_back((bit<48>)smt.enq_timestamp);
@@ -205,28 +208,28 @@ control MyIngress(inout headers hdr,
     
     table calculate {
         key = {
-            hdr.p4calc.op        : exact;
+            hdr.p4get.op        : exact;
         }
         actions = {
-            operation_add;
-            operation_sub;
-            operation_and;
+            get_ingress_port;
+            get_pkt_lenght;
+            get_enq_timestamp;
             operation_or;
             operation_xor;
             operation_drop;
         }
         const default_action = operation_drop();
         const entries = {
-            P4CALC_PLUS : operation_add();
-            P4CALC_MINUS: operation_sub();
-            P4CALC_AND  : operation_and();
-            P4CALC_OR   : operation_or();
-            P4CALC_CARET: operation_xor();
+            OP_0 : get_ingress_port();
+            OP_1 : get_pkt_lenght();
+            OP_2 : get_enq_timestamp();
+            OP_3 : operation_or();
+            OP_4 : operation_xor();
         }
     }
             
     apply {
-        if (hdr.p4calc.isValid()) {
+        if (hdr.p4get.isValid()) {
             calculate.apply();
         } else {
             operation_drop();
@@ -257,7 +260,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
-        packet.emit(hdr.p4calc);
+        packet.emit(hdr.p4get);
     }
 }
 
