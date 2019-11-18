@@ -46,5 +46,5 @@ dirs:
 	mkdir -p $(BUILD_DIR) $(PCAP_DIR) $(LOG_DIR)
 
 clean: stop
-	rm -f *.pcap
+	rm -f *.pcap *.swp
 	rm -rf $(BUILD_DIR) $(PCAP_DIR) $(LOG_DIR)
