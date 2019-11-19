@@ -19,11 +19,12 @@
  * 4 is an ASCII Letter '4' (0x34)
  * Version is currently 0.1 (0x01)
  * Op is an operation to Perform:
- *   '+' (0x2b) Result = OperandA + OperandB
- *   '-' (0x2d) Result = OperandA - OperandB
- *   '&' (0x26) Result = OperandA & OperandB
- *   '|' (0x7c) Result = OperandA | OperandB
- *   '^' (0x5e) Result = OperandA ^ OperandB
+ *   '0' (0x2b) Result = ingress_port
+ *   '1' (0x2d) Result = egress_port
+ *   '2' (0x26) Result = packet_lenght
+ *   '3' (0x26) Result = enq_timestamp
+ *   '4' (0x7c) Result = 
+ *   '5' (0x5e) Result = 
  *
  * The device receives a packet, performs the requested operation, fills in the 
  * result and sends the packet back out of the same port it came in on, while 
@@ -76,20 +77,9 @@ header p4get_t {
     bit<8>  four;   //    
     bit<8>  ver;    //
     bit<8>  op;     // 
-//    bit<32> var1;   // valor 1   
-//    bit<32> var2;   // valor 2
     bit<32> res;    // resultado
-    //bit<48> resb;    // resultado
-
+    bit<48> res48;    // resultado
 }
-
-header smt_t {
-    bit<7>  tmp;   //completar pacote multiplo de 8 pra compliar
-    bit<9>  smt9b;      //ingress_port, egress_port, egress_spect
-    bit<32> smt32b;     //instance_type,packet_lenght,enq_timestamp,deq_timedelta
-    bit<48> smt48b;     //(in/egr)_global_timestamp;
-}
-
 
 /*
  * All headers, used in the program needs to be assembled into a single struct.
@@ -99,7 +89,6 @@ header smt_t {
 struct headers {
     ethernet_t  ethernet;
     p4get_t     p4get;
-    smt_t       smt_campos;        
 }
 
 /*
@@ -171,36 +160,38 @@ control MyIngress(inout headers hdr,
     }
     
     // OP 0 
-    action get_ingress_port() {
-        //9 bits
+    action get_ingress_port() { // 9 bits
         send_back((bit<32>)smt.ingress_port);
         //send_back((bit<48>)smt.ingress_port);
     }
     
     // OP 1
-    action get_pkt_lenght() {
-        //32 bits
+    action get_egress_port() { // 9 bits
+        send_back((bit<32>)smt.egress_port);
+        //send_back((bit<48>)smt.egress_port);
+    }
+    
+    // OP 2
+    action get_pkt_lenght() { // 32 bits
         send_back(smt.packet_length);
         //send_back((bit<48>)smt.packet_length);
     }
     
-    // OP 2
-    action get_enq_timestamp() {
-        //32 bits
+    // OP 3 - is the timestamp when the packet is enqueued (between the ingress
+    // and egress pipelines). Todos os timestamp sao em microsegundos
+    action get_enq_timestamp() { //32 bits
         send_back(smt.enq_timestamp);
         //send_back((bit<48>)smt.enq_timestamp);
     }
     
-    action operation_or() {
-        //32 bits
-        send_back(smt.packet_length);
+    // OP 4 - 
+    action get_enq_qdepth() { // 19 bits
+        send_back((bit<32>)smt.enq_qdepth);
+        //send_back((bit<48>)smt.enq_qdepth);
         //send_back(smt.egress_global_timestamp);
+
     }
 
-    action operation_xor() {
-        send_back((bit<32>)smt.egress_port);
-        //send_back(smt.ingress_global_timestamp);
-    }
 
     action operation_drop() {
         mark_to_drop(smt);
@@ -212,19 +203,19 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             get_ingress_port;
+            get_egress_port;
             get_pkt_lenght;
             get_enq_timestamp;
-            operation_or;
-            operation_xor;
+            get_enq_qdepth;
             operation_drop;
         }
         const default_action = operation_drop();
         const entries = {
             OP_0 : get_ingress_port();
-            OP_1 : get_pkt_lenght();
-            OP_2 : get_enq_timestamp();
-            OP_3 : operation_or();
-            OP_4 : operation_xor();
+            OP_1 : get_egress_port();
+            OP_2 : get_pkt_lenght();
+            OP_3 : get_enq_timestamp();
+            OP_4 : get_enq_qdepth();
         }
     }
             
