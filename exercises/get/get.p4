@@ -1,10 +1,18 @@
 /* -*- P4_16 -*- */
 
 /*
- * P4 Calculator
+ * P4 Get
  *
- * This program implements a simple protocol. It can be carried over Ethernet
- * (Ethertype 0x1234).
+ * Modificacao do programa P4Calc disponibilizado nas documentacoes do git do
+ * P4.org, para testar a recuperacao das informacoes de statament_metadata.
+ * 
+ * Mantido o mesmo (Ethertype 0x1234) e alteradas as opcoes de escolha para
+ * numeracao decimal. 
+ * 
+ * Adicionado um campo de resposta de 48 bits para testar as respostas de
+ * timestamp que possuem este tamanho e ajustadas as respostas do campos
+ * menores (9,16,19.. bits) para serem convertidas para a resposta no campo de
+ * 32 bits.
  *
  * The Protocol header looks like this:
  *
@@ -14,17 +22,22 @@
  * +----------------+----------------+----------------+---------------+
  * |                              Result                              |
  * +----------------+----------------+----------------+---------------+
+ * |                            Result 2                              
+ * +----------------+----------------+----------------+---------------+
+ *                                   |
+ * +----------------+----------------+
  *
  * P is an ASCII Letter 'P' (0x50)
  * 4 is an ASCII Letter '4' (0x34)
  * Version is currently 0.1 (0x01)
  * Op is an operation to Perform:
- *   '0' (0x2b) Result = ingress_port
- *   '1' (0x2d) Result = egress_port
- *   '2' (0x26) Result = packet_lenght
- *   '3' (0x26) Result = enq_timestamp
- *   '4' (0x7c) Result = 
- *   '5' (0x5e) Result = 
+ *   '0' = ingress_port
+ *   '1' = egress_port
+ *   '2' = packet_lenght
+ *   '3' = enq_timestamp
+ *   '4' = enq_qdepth 
+ *   '5' = ing_global_tmp
+ *   '6' = eg_global_tmp 
  *
  * The device receives a packet, performs the requested operation, fills in the 
  * result and sends the packet back out of the same port it came in on, while 
@@ -139,24 +152,25 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t smt) {
     action send_back(bit<32> result) {
-    //action send_back(bit<48> result) {
-        /* TODO
-         * - put the result back in hdr.p4calc.res
-         * - swap MAC addresses in hdr.ethernet.dstAddr and
-         *   hdr.ethernet.srcAddr using a temp variable
-         * - Send the packet back to the port it came from
-             by saving standard_metadata.ingress_port into
-             standard_metadata.egress_spec
-         */
         bit<48> tmp_mac;
         hdr.p4get.res = result;
+        hdr.p4get.res48 = 48w0;
         tmp_mac = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
         hdr.ethernet.srcAddr = tmp_mac;
         //Diferenca entre egress_spect e egress_port?
         smt.egress_spec = smt.ingress_port;
-        
-  
+    }
+    
+    action send_back48(bit<48> result) {
+        bit<48> tmp_mac;
+        hdr.p4get.res = 32w0;
+        hdr.p4get.res48 = result;
+        tmp_mac = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
+        hdr.ethernet.srcAddr = tmp_mac;
+        //Diferenca entre egress_spect e egress_port?
+        smt.egress_spec = smt.ingress_port;
     }
     
     // OP 0 
@@ -189,9 +203,17 @@ control MyIngress(inout headers hdr,
         send_back((bit<32>)smt.enq_qdepth);
         //send_back((bit<48>)smt.enq_qdepth);
         //send_back(smt.egress_global_timestamp);
-
     }
 
+    // OP 5 - 
+    action get_ing_global_tmp() { // 48 bits
+        send_back48(smt.ingress_global_timestamp);
+    }
+
+    // OP 6 - 
+    action get_eg_global_tmp() { // 48 bits
+        send_back48(smt.egress_global_timestamp);
+    }
 
     action operation_drop() {
         mark_to_drop(smt);
@@ -207,6 +229,8 @@ control MyIngress(inout headers hdr,
             get_pkt_lenght;
             get_enq_timestamp;
             get_enq_qdepth;
+            get_ing_global_tmp;
+            get_eg_global_tmp;
             operation_drop;
         }
         const default_action = operation_drop();
@@ -216,6 +240,8 @@ control MyIngress(inout headers hdr,
             OP_2 : get_pkt_lenght();
             OP_3 : get_enq_timestamp();
             OP_4 : get_enq_qdepth();
+            OP_5 : get_ing_global_tmp();
+            OP_6 : get_eg_global_tmp();
         }
     }
             
