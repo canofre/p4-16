@@ -18,11 +18,11 @@
  *
  *        0                1                  2              3
  * +----------------+----------------+----------------+---------------+
- * |      p         |       Op       |<<--        res 32 bit
+ * |      p         |       Op       |            res 32 bit
  * +----------------+----------------+----------------+---------------+
- *                               -->>|<<--           
+ *                                   |                                
  * +----------------+----------------+----------------+---------------+
- *                            res48 - 48 bits                      -->>|            
+ *                           res48 - 48 bits                          |            
  * +----------------+----------------+----------------+---------------+
  *
  * P is an ASCII Letter 'C' (0x64)
@@ -32,8 +32,9 @@
  *   '2' = packet_lenght
  *   '3' = enq_timestamp
  *   '4' = enq_qdepth 
- *   '5' = ing_global_tmp
- *   '6' = eg_global_tmp 
+ *   '5' = deq_timedelta 
+ *   '6' = ing_global_tmp
+ *   '7' = eg_global_tmp 
  *
  * The device receives a packet, performs the requested operation, fills in the 
  * result and sends the packet back out of the same port it came in on, while 
@@ -172,7 +173,6 @@ control MyIngress(inout headers hdr,
     // OP 0 
     action get_ingress_port() { // 9 bits
         send_back((bit<32>)smt.ingress_port);
-        //send_back((bit<48>)smt.ingress_port);
     }
     
     // OP 1
@@ -184,29 +184,30 @@ control MyIngress(inout headers hdr,
     // OP 2
     action get_pkt_lenght() { // 32 bits
         send_back(smt.packet_length);
-        //send_back((bit<48>)smt.packet_length);
     }
     
-    // OP 3 - is the timestamp when the packet is enqueued (between the ingress
+    // OP 3 - timestamp when the packet is enqueued (between the ingress
     // and egress pipelines). Todos os timestamp sao em microsegundos
     action get_enq_timestamp() { //32 bits
         send_back(smt.enq_timestamp);
-        //send_back((bit<48>)smt.enq_timestamp);
     }
     
     // OP 4 - 
     action get_enq_qdepth() { // 19 bits
         send_back((bit<32>)smt.enq_qdepth);
-        //send_back((bit<48>)smt.enq_qdepth);
-        //send_back(smt.egress_global_timestamp);
     }
 
-    // OP 5 - 
+    // OP 5 - is the time the packet spent in the queue (I believe it is what you are after)
+    action get_deq_timedelta() { // 48 bits
+        send_back(smt.deq_timedelta);
+    }
+
+    // OP 6 - timestamp de quando o switch inicia o processamento do pacote
     action get_ing_global_tmp() { // 48 bits
         send_back48(smt.ingress_global_timestamp);
     }
 
-    // OP 6 - 
+    // OP 7 - 
     action get_eg_global_tmp() { // 48 bits
         send_back48(smt.egress_global_timestamp);
     }
@@ -225,6 +226,7 @@ control MyIngress(inout headers hdr,
             get_pkt_lenght;
             get_enq_timestamp;
             get_enq_qdepth;
+            get_deq_timedelta;
             get_ing_global_tmp;
             get_eg_global_tmp;
             operation_drop;
@@ -236,8 +238,9 @@ control MyIngress(inout headers hdr,
             OP_2 : get_pkt_lenght();
             OP_3 : get_enq_timestamp();
             OP_4 : get_enq_qdepth();
-            OP_5 : get_ing_global_tmp();
-            OP_6 : get_eg_global_tmp();
+            OP_5 : get_deq_timedelta();
+            OP_6 : get_ing_global_tmp();
+            OP_7 : get_eg_global_tmp();
         }
     }
             
