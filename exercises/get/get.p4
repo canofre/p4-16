@@ -6,30 +6,26 @@
  * Modificacao do programa P4Calc disponibilizado nas documentacoes do git do
  * P4.org, para testar a recuperacao das informacoes de statament_metadata.
  * 
- * Mantido o mesmo (Ethertype 0x1234) e alteradas as opcoes de escolha para
- * numeracao decimal. 
+ * Removidos os campos versao e o numero 4, mantendo o mesmo Ethertype 0x1234.
+ * Alteradas as opcoes de escolha para numeracao decimal. 
  * 
  * Adicionado um campo de resposta de 48 bits para testar as respostas de
  * timestamp que possuem este tamanho e ajustadas as respostas do campos
  * menores (9,16,19.. bits) para serem convertidas para a resposta no campo de
  * 32 bits.
  *
- * The Protocol header looks like this:
+ * O header do protocolo ficou montado como segue:
  *
  *        0                1                  2              3
  * +----------------+----------------+----------------+---------------+
- * |      P         |       4        |     Version    |     Op        |
+ * |      p         |       Op       |<<--        res 32 bit
  * +----------------+----------------+----------------+---------------+
- * |                              Result                              |
+ *                               -->>|<<--           
  * +----------------+----------------+----------------+---------------+
- * |                            Result 2                              
+ *                            res48 - 48 bits                      -->>|            
  * +----------------+----------------+----------------+---------------+
- *                                   |
- * +----------------+----------------+
  *
- * P is an ASCII Letter 'P' (0x50)
- * 4 is an ASCII Letter '4' (0x34)
- * Version is currently 0.1 (0x01)
+ * P is an ASCII Letter 'C' (0x64)
  * Op is an operation to Perform:
  *   '0' = ingress_port
  *   '1' = egress_port
@@ -68,9 +64,6 @@ header ethernet_t {
  * etherType 0x1234 for it (see parser)
  */
 const bit<16> P4CALC_ETYPE = 0x1234;
-const bit<8>  P4CALC_P     = 0x50;   // 'P'
-const bit<8>  P4CALC_4     = 0x34;   // '4'
-const bit<8>  P4CALC_VER   = 0x01;   // v0.1
 const bit<8>  OP_0     = 0x30;   // '1'
 const bit<8>  OP_1     = 0x31;   // '1'
 const bit<8>  OP_2     = 0x32;   // '2'
@@ -86,12 +79,10 @@ const bit<8>  OP_8     = 0x38;   // '8'
  * entries based on above protocol header definition.
  */
 header p4get_t {
-    bit<8>  p;      // Letra P (0x50)
-    bit<8>  four;   //    
-    bit<8>  ver;    //
+    bit<8>  p;      // Letra C (0x64)
     bit<8>  op;     // 
     bit<32> res;    // resultado
-    bit<48> res48;    // resultado
+    bit<48> res48;  // resultado
 }
 
 /*
@@ -151,10 +142,13 @@ control MyVerifyChecksum(inout headers hdr,
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t smt) {
+    
     action send_back(bit<32> result) {
         bit<48> tmp_mac;
+        
         hdr.p4get.res = result;
         hdr.p4get.res48 = 48w0;
+        
         tmp_mac = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
         hdr.ethernet.srcAddr = tmp_mac;
@@ -164,8 +158,10 @@ control MyIngress(inout headers hdr,
     
     action send_back48(bit<48> result) {
         bit<48> tmp_mac;
+        
         hdr.p4get.res = 32w0;
         hdr.p4get.res48 = result;
+        
         tmp_mac = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
         hdr.ethernet.srcAddr = tmp_mac;
