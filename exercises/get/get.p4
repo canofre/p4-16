@@ -192,22 +192,26 @@ control MyIngress(inout headers hdr,
         send_back(smt.enq_timestamp);
     }
     
-    // OP 4 - 
+    // OP 4 -  the depth of the queue when the packet was first enqueued
     action get_enq_qdepth() { // 19 bits
         send_back((bit<32>)smt.enq_qdepth);
     }
 
-    // OP 5 - is the time the packet spent in the queue (I believe it is what you are after)
+    // OP 5 - the time, in microseconds, that the packet spent in the queue
     action get_deq_timedelta() { // 48 bits
         send_back(smt.deq_timedelta);
     }
 
-    // OP 6 - timestamp de quando o switch inicia o processamento do pacote
+    // OP 6 - a timestamp, in microseconds, set when the packet shows up on ingress. The clock 
+    // is set to 0 every time the switch starts. This field can be read directly from either 
+    // pipeline (ingress and egress) but should not be written to.
     action get_ing_global_tmp() { // 48 bits
         send_back48(smt.ingress_global_timestamp);
     }
 
-    // OP 7 - 
+    // OP 7 - a timestamp, in microseconds, set when the packet starts egress processing. The 
+    // clock is the same as for ingress_global_timestamp. This field should only be read from 
+    // the egress pipeline, but should not be written to.
     action get_eg_global_tmp() { // 48 bits
         send_back48(smt.egress_global_timestamp);
     }
