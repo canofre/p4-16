@@ -73,7 +73,7 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ethernet);
         // Esse select e tipo sw-case, retornando o etherType que de alguma
         // forma e comparado com o TYPE_IPV4, e sendo igual, passa para o 
-        // prosimo estado
+        // proximo estado
         transition select(hdr.ethernet.etherType){
             TYPE_IPV4: parse_ipv4;
             // Caso nao seja encontrato a acao default e aceitar. Para uma
@@ -182,7 +182,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
               hdr.ipv4.ttl,
               hdr.ipv4.protocol,
               hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr },
+              hdr.ipv4.dstAddr },should 
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
     }
