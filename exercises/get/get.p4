@@ -30,9 +30,9 @@
  *   '0' = ingress_port
  *   '1' = egress_port
  *   '2' = packet_lenght
- *   '3' = enq_timestamp
- *   '4' = enq_qdepth 
- *   '5' = deq_timedelta 
+ *   '3' = enq_timestamp    -> egress
+ *   '4' = enq_qdepth       -> egress
+ *   '5' = deq_timedelta    -> egress
  *   '6' = ing_global_tmp
  *   '7' = eg_global_tmp 
  *
