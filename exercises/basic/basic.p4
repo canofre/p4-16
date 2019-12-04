@@ -48,28 +48,27 @@ struct headers {
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
-/* A ordem de excrita dos estados do parser pode ser alterada no codigo e ele
+/* A ordem de escrita dos estados do parser pode ser alterada no codigo e ele
  * continua a executar sem problemas, ou seja, nao necessita ser sequencial
-*/
+ */
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
-    /* a opcao transition definie a acao a ser realizada
-    * que no caso era aceitar o pacote mas poderia ser reject
-    * ou o que vai ser definido para ser executado no proximo passo
-    */
+    /* a opcao transition definie a acao a ser realizada, que no caso era
+     * aceitar o pacote, mas poderia ser reject ou outro estado para o qual
+     * seja definido para ser executado no proximo passo. 
+     */
     state start {
-        // transition: aceita (accept), rejeita (reject) 
-        // ou transmite o controle para outro estado, no caso parse_ethernet
-        // que poderia ter sido colocado diretamente no stado inicial
+        // O conteúdo do parse_ethernet poderia ter sido colocado diretamente
+        // no estado inicial
         transition parse_ethernet;
     }
 
     state parse_ethernet {
-        // Extrai do paket de entrada as informacoes para a extrutura
-        // headres que contem o MAC e o IPv4
+        // Extrai do paket de entrada as informacoes para a estrutura headers
+        // que contem o MAC e o IPv4
         packet.extract(hdr.ethernet);
         // Esse select e tipo sw-case, retornando o etherType que de alguma
         // forma e comparado com o TYPE_IPV4, e sendo igual, passa para o 
