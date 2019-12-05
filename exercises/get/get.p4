@@ -30,11 +30,14 @@
  *   '0' = ingress_port
  *   '1' = egress_port
  *   '2' = packet_lenght
- *   '3' = enq_timestamp    -> egress
- *   '4' = enq_qdepth       -> egress
- *   '5' = deq_timedelta    -> egress
- *   '6' = ing_global_tmp
- *   '7' = eg_global_tmp 
+ *   '3' = ing_global_tmp
+ *      
+ *   '5' = eg_global_tmp    -> egress
+ *   '6' = enq_timestamp    -> egress
+ *   '7' = enq_qdepth       -> egress
+ *   '8' = deq_timedelta    -> egress
+ *   '9' = deq_qdepth       -> egress
+ * 
  *
  * The device receives a packet, performs the requested operation, fills in the 
  * result and sends the packet back out of the same port it came in on, while 
@@ -61,7 +64,7 @@ header ethernet_t {
 }
 
 /*
- * This is a custom protocol header for the calculator. We'll use 
+ * This is a custom protocol header for the calculator. We'll use
  * etherType 0x1234 for it (see parser)
  */
 const bit<16> P4CALC_ETYPE = 0x1234;
@@ -74,10 +77,11 @@ const bit<8>  OP_5     = 0x35;   // '5'
 const bit<8>  OP_6     = 0x36;   // '6' 
 const bit<8>  OP_7     = 0x37;   // '7' 
 const bit<8>  OP_8     = 0x38;   // '8' 
+const bit<8>  OP_9     = 0x39;   // '8' 
 
-/* TODO
- * fill p4calc_t header with P, four, ver, op, operand_a, operand_b, and res
- * entries based on above protocol header definition.
+
+/* 
+ * Cabeçalho do pacote que será enviado
  */
 header p4get_t {
     bit<8>  p;      // Letra C (0x64)
@@ -102,7 +106,6 @@ struct headers {
  * declare the type, but there is no need to instantiate it,
  * because it is done "by the architecture", i.e. outside of P4 functions
  */
- 
 struct metadata {
     /* In our case it is empty */
 }
@@ -114,10 +117,10 @@ parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {    
+
     state start {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            //P4CALC_ETYPE : check_p4calc;
             P4CALC_ETYPE : parse_p4get;
             default      : accept;
         }
@@ -132,90 +135,64 @@ parser MyParser(packet_in packet,
 /*************************************************************************
  ************   C H E C K S U M    V E R I F I C A T I O N   *************
  *************************************************************************/
-control MyVerifyChecksum(inout headers hdr,
-                         inout metadata meta) {
+control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply { }
 }
 
 /*************************************************************************
  **************  I N G R E S S   P R O C E S S I N G   *******************
  *************************************************************************/
-control MyIngress(inout headers hdr,
-                  inout metadata meta,
-                  inout standard_metadata_t smt) {
+control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t smt) {
+    
+    action set_egress_port(){        
+        bit<48> tmp_mac;
+        tmp_mac = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
+        hdr.ethernet.srcAddr = tmp_mac;
+        // a porta de saida somente pode ser definida no pipeline de ingresso
+        smt.egress_spec = smt.ingress_port;
+    }
     
     action send_back(bit<32> result) {
-        bit<48> tmp_mac;
         
         hdr.p4get.res = result;
         hdr.p4get.res48 = 48w0;
         
-        tmp_mac = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
-        hdr.ethernet.srcAddr = tmp_mac;
-        //Diferenca entre egress_spect e egress_port?
-        smt.egress_spec = smt.ingress_port;
+        set_egress_port();
     }
     
     action send_back48(bit<48> result) {
-        bit<48> tmp_mac;
         
         hdr.p4get.res = 32w0;
         hdr.p4get.res48 = result;
         
-        tmp_mac = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
-        hdr.ethernet.srcAddr = tmp_mac;
-        //Diferenca entre egress_spect e egress_port?
-        smt.egress_spec = smt.ingress_port;
+        set_egress_port();
     }
     
-    // OP 0 
+    // OP 0 - porta de entrada 
     action get_ingress_port() { // 9 bits
         send_back((bit<32>)smt.ingress_port);
     }
     
-    // OP 1
+    // OP 1 - porta de saída
     action get_egress_port() { // 9 bits
         send_back((bit<32>)smt.egress_port);
-        //send_back((bit<48>)smt.egress_port);
     }
     
-    // OP 2
+    // OP 2 - tamanho do pacote
     action get_pkt_lenght() { // 32 bits
         send_back(smt.packet_length);
     }
     
-    // OP 3 - timestamp when the packet is enqueued (between the ingress
-    // and egress pipelines). Todos os timestamp sao em microsegundos
-    action get_enq_timestamp() { //32 bits
-        send_back(smt.enq_timestamp);
-    }
-    
-    // OP 4 -  the depth of the queue when the packet was first enqueued
-    action get_enq_qdepth() { // 19 bits
-        send_back((bit<32>)smt.enq_qdepth);
-    }
-
-    // OP 5 - the time, in microseconds, that the packet spent in the queue
-    action get_deq_timedelta() { // 48 bits
-        send_back(smt.deq_timedelta);
-    }
-
-    // OP 6 - a timestamp, in microseconds, set when the packet shows up on ingress. The clock 
-    // is set to 0 every time the switch starts. This field can be read directly from either 
-    // pipeline (ingress and egress) but should not be written to.
-    action get_ing_global_tmp() { // 48 bits
+    /* OP 3 - a timestamp, in microseconds, set when the packet shows up on
+     * ingress. The clock is set to 0 every time the switch starts. This field 
+     * can be read directly from either pipeline (ingress and egress) but 
+     * should not be written to. 
+    */
+   action get_ing_global_tmp() { // 48 bits
         send_back48(smt.ingress_global_timestamp);
     }
-
-    // OP 7 - a timestamp, in microseconds, set when the packet starts egress processing. The 
-    // clock is the same as for ingress_global_timestamp. This field should only be read from 
-    // the egress pipeline, but should not be written to.
-    action get_eg_global_tmp() { // 48 bits
-        send_back48(smt.egress_global_timestamp);
-    }
-
+    
     action operation_drop() {
         mark_to_drop(smt);
     }
@@ -228,29 +205,23 @@ control MyIngress(inout headers hdr,
             get_ingress_port;
             get_egress_port;
             get_pkt_lenght;
-            get_enq_timestamp;
-            get_enq_qdepth;
-            get_deq_timedelta;
             get_ing_global_tmp;
-            get_eg_global_tmp;
             operation_drop;
+            set_egress_port;
         }
-        const default_action = operation_drop();
+        // acao realizada se nao encontrar correspondencia na tabela
+        const default_action = set_egress_port();
         const entries = {
             OP_0 : get_ingress_port();
             OP_1 : get_egress_port();
             OP_2 : get_pkt_lenght();
-            OP_3 : get_enq_timestamp();
-            OP_4 : get_enq_qdepth();
-            OP_5 : get_deq_timedelta();
-            OP_6 : get_ing_global_tmp();
-            OP_7 : get_eg_global_tmp();
+            OP_3 : get_ing_global_tmp();
         }
     }
             
     apply {
-        if (hdr.p4get.isValid()) {
-            calculate.apply();
+        if (hdr.p4get.isValid() ) {
+           calculate.apply(); 
         } else {
             operation_drop();
         }
@@ -262,8 +233,75 @@ control MyIngress(inout headers hdr,
  *************************************************************************/
 control MyEgress(inout headers hdr,
                  inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
-    apply { }
+                 inout standard_metadata_t smt) {
+
+    action send_back_eg(bit<48> result){
+        hdr.p4get.res = 32w0;
+        hdr.p4get.res48 = result;
+    }
+
+    /* OP 5 - a timestamp, in microseconds, set when the packet starts egress
+     * processing. The clock is the same as for ingress_global_timestamp. This 
+     * field should only be read from the egress pipeline, but should not be written to.
+    */
+    action get_eg_global_tmp() { // 48 bits
+        send_back_eg(smt.egress_global_timestamp);
+    }
+    
+    /* OP 6 - timestamp when the packet is enqueued (between the ingress
+     * and egress pipelines). Todos os timestamp sao em microsegundos
+    */
+    action get_eg_enq_timestamp() { //32 bits
+        send_back_eg((bit<48>)smt.enq_timestamp);
+    }
+    
+    // OP 7 -  the depth of the queue when the packet was first enqueued
+    action get_eg_enq_qdepth() { // 19 bits
+        send_back_eg((bit<48>)smt.enq_qdepth);
+    }
+
+    // OP 8 - the time, in microseconds, that the packet spent in the queue
+    action get_eg_deq_timedelta() { // 32 bits
+        send_back_eg((bit<48>)smt.deq_timedelta);
+    }
+
+    // OP 9
+    action get_eg_deq_qdepth() { // 16 bits
+        send_back_eg((bit<48>)smt.egress_global_timestamp);
+    }
+
+    action operation_drop() {
+        mark_to_drop(smt);
+    }
+    
+    table get_eg {
+        key = {
+            hdr.p4get.op        : exact;
+        }
+        actions = {
+            get_eg_global_tmp;
+            get_eg_enq_timestamp;
+            get_eg_enq_qdepth;
+            get_eg_deq_timedelta;
+            get_eg_deq_qdepth;
+            NoAction();
+        }
+        const default_action = NoAction();
+        const entries = {
+            OP_5 : get_eg_global_tmp();
+            OP_6 : get_eg_enq_timestamp();
+            OP_7 : get_eg_enq_qdepth();
+            OP_8 : get_eg_deq_timedelta();
+            OP_9 : get_eg_deq_qdepth();
+        }
+    }
+            
+    apply {
+        /* nao se faz necessario validar novamente, pois ja foi validado no
+         * ingress. A nao ser que se deseje testar outros paremetros.
+        */
+        get_eg.apply();
+    }
 }
 
 /*************************************************************************
