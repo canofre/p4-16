@@ -50,7 +50,7 @@ struct headers {
 *************************************************************************/
 /* A ordem de escrita dos estados do parser pode ser alterada no codigo e ele
  * continua a executar sem problemas, ou seja, nao necessita ser sequencial
- */
+*/
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
@@ -59,7 +59,7 @@ parser MyParser(packet_in packet,
     /* a opcao transition definie a acao a ser realizada, que no caso era
      * aceitar o pacote, mas poderia ser reject ou outro estado para o qual
      * seja definido para ser executado no proximo passo. 
-     */
+    */
     state start {
         // O conteúdo do parse_ethernet poderia ter sido colocado diretamente
         // no estado inicial
@@ -67,19 +67,18 @@ parser MyParser(packet_in packet,
     }
 
     state parse_ethernet {
-        // Extrai do paket de entrada as informacoes para a estrutura headers
-        // que contem o MAC e o IPv4
+        /* Extrai do paket de entrada as informacoes para a estrutura headers
+         * que contem o MAC e o IPv4
+        */
         packet.extract(hdr.ethernet);
-        // Esse select e tipo sw-case, retornando o etherType que de alguma
-        // forma e comparado com o TYPE_IPV4, e sendo igual, passa para o 
-        // proximo estado
+        /* Esse select é tipo sw-case, retornando o etherType e comparando com
+         * as opções existentes, passando para o parser que corresponder
+        */
         transition select(hdr.ethernet.etherType){
             TYPE_IPV4: parse_ipv4;
-            // Caso nao seja encontrato a acao default e aceitar. Para uma
-            // falta de acao padrao teria que ser definido um erro em
-            // error.NoMatch. 
-            //default: accept; //a forma alternativa escrita abaixo
-            _: accept;
+            // ação default realizada caso não ocorra correspondência
+            default: accept; 
+            //_: accept; //forma alternativa de definir a ação default
         }
     }
     
@@ -87,11 +86,8 @@ parser MyParser(packet_in packet,
 		// Extrai do pacote de entrada o tipo ipv4 para o headers hdr
 		packet.extract (hdr.ipv4);
 		// Termina a execucao do parser atual e passa para o proximo estado 
-        // que no caso e aceito.
 		transition accept;
 	} 
-    
-
 }
 
 
@@ -109,7 +105,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 /* Esse bloco e sequencia, sendo necessario que os elementos chamados estejam
  * descritos antes da sua chamada
- */
+*/
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     
     //Acao definida para a tabela ipv4
@@ -124,11 +120,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
-    // Indica que sera consultado o Ip destido via lpm e define as acoes 
-    // possiveis. A defincao da acao a ser tomada e na tabela definiada nos 
-    // arquivos JSON. Se existir uma correspondencia uma acao e definida
-    // caso nao exista correspondencia outra acao e deficida, ver arquivos
-    // de definicao da topologia.
+    /* Indica que sera consultado o Ip destido via lpm e define as acoes 
+     * possiveis. A defincao da acao a ser tomada e na tabela definiada nos 
+     * arquivos JSON. Se existir uma correspondencia uma acao e definida
+     * caso nao exista correspondencia uma ação default é realizada. Caso não
+     * seja definida a ação default, nenhuma ação é realizada.
+    */
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -139,6 +136,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             NoAction;
         }
         size = 1024;
+        // Acao realizada caso nao seja encontrada correspondencia na tabela.
         default_action = NoAction();
     }
 
@@ -153,10 +151,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 /*******************************************************************************
 ****************  E G R E S S   P R O C E S S I N G   **************************
 *******************************************************************************/
-/* Bloco de controle da saida do pacote. Esta diretamente ligado ao bloco
- * MyEgress pois as saidas do MyIngress sao as entradas do MyEgress. 
- * No caso esse bloco nao realiza nenhuma acao, apenas da sequencia ao fluxo
- */
+/* Bloco de controle da saída do pacote. Esta diretamente ligado ao bloco
+ * MyEgress pois as saídas do MyIngress são as entradas do MyEgress. 
+ * No caso esse bloco não realiza nenhuma acao, apenas da sequencia ao fluxo
+*/
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
      apply {  }
 }
@@ -164,7 +162,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
-/* Bloco para verificacao do hash do pacote. Utiliza a funcao update_checksum
+/* Bloco para verificação do hash do pacote. Utiliza a função update_checksum
  * definida em v1model.
 */
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
@@ -194,7 +192,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 // Remonta e despacha o pacote
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        // Escreve os cabecalhos no pacote de saida
+        // Escreve os cabeçalhos no pacote de saída
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
