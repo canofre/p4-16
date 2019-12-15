@@ -47,12 +47,12 @@ header probe_t {
 
 // The data added to the probe by each switch at each hop.
 header probe_data_t {
-    bit<1>    bos;
-    bit<7>    swid;
-    bit<8>    port;
-    bit<32>   byte_cnt;
-    time_t    last_time;
-    time_t    cur_time;
+    bit<1>    bos;          // bottom of stack
+    bit<7>    swid;         // ID do sw
+    bit<8>    port;         // porta de saida
+    bit<32>   byte_cnt;     // bytes trafegados
+    time_t    last_time;    //
+    time_t    cur_time;     //
 }
 
 // Indicates the egress port the switch should send this probe
@@ -114,14 +114,6 @@ parser MyParser(packet_in packet,
         }
     }
 
-    state parse_probe_data {
-        packet.extract(hdr.probe_data.next);
-        transition select(hdr.probe_data.last.bos) {
-            1: parse_probe_fwd;
-            default: parse_probe_data;
-        }
-    }
-
     state parse_probe_fwd {
         packet.extract(hdr.probe_fwd.next);
         meta.parser_metadata.remaining = meta.parser_metadata.remaining - 1;
@@ -130,6 +122,15 @@ parser MyParser(packet_in packet,
         transition select(meta.parser_metadata.remaining) {
             0: accept;
             default: parse_probe_fwd;
+        }
+    }
+
+    state parse_probe_data {
+        // probe_data e um array e o next busca o proximo elemento no header
+        packet.extract(hdr.probe_data.next);
+        transition select(hdr.probe_data.last.bos) {
+            1: parse_probe_fwd;
+            default: parse_probe_data;
         }
     }
 }
@@ -236,13 +237,15 @@ control MyEgress(inout headers hdr,
             // set switch ID field
             swid.apply();
             // TODO: fill out the rest of the probe packet fields
-            // hdr.probe_data[0].port = ...
-            // hdr.probe_data[0].byte_cnt = ...
-            // TODO: read / update the last_time_reg
-            // last_time_reg.read(<val>, <index>);
-            // last_time_reg.write(<index>, <val>); 
-            // hdr.probe_data[0].last_time = ...
-            // hdr.probe_data[0].cur_time = ...
+            hdr.probe_data[0].port = (bit<8>)standard_metadata.egress_port;
+            hdr.probe_data[0].byte_cnt = byte_cnt;
+            // Recupera o timestamp do registrador e adiciona ao probe_data
+            last_time_reg.read(last_time,(bit<32>)standard_metadata.egress_port);
+            hdr.probe_data[0].last_time = last_time;
+           
+            // Atualiza o timestamp do reg com o tempo atual 
+            last_time_reg.write((bit<32>)standard_metadata.egress_port,cur_time); 
+            hdr.probe_data[0].cur_time = cur_time;
         }
     }
 }
@@ -252,11 +255,11 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
-     apply {
+    apply {
 	update_checksum(
 	    hdr.ipv4.isValid(),
             { hdr.ipv4.version,
-	      hdr.ipv4.ihl,
+    	      hdr.ipv4.ihl,
               hdr.ipv4.diffserv,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
@@ -290,10 +293,10 @@ control MyDeparser(packet_out packet, in headers hdr) {
 *************************************************************************/
 
 V1Switch(
-MyParser(),
-MyVerifyChecksum(),
-MyIngress(),
-MyEgress(),
-MyComputeChecksum(),
-MyDeparser()
+    MyParser(),
+    MyVerifyChecksum(),
+    MyIngress(),
+    MyEgress(),
+    MyComputeChecksum(),
+    MyDeparser()
 ) main;
