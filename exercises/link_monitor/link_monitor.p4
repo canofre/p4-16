@@ -51,8 +51,8 @@ header probe_data_t {
     bit<7>    swid;         // ID do sw
     bit<8>    port;         // porta de saida
     bit<32>   byte_cnt;     // bytes trafegados
-    time_t    last_time;    //
-    time_t    cur_time;     //
+    time_t    last_time;    // egress_global_timestamp anterior
+    time_t    cur_time;     // egress_global_timestamp
 }
 
 // Indicates the egress port the switch should send this probe
@@ -104,7 +104,10 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ipv4);
         transition accept;
     }
-
+    /* O parser percorre até o primeiro elemento da pilha, porque a cada salto
+     * um novo hop é inseriro na posição 0 (zero). No egress, a pilha é movida
+     * uma posição. Se for o primeiro hop passa para o parser_prob_fwd.
+     */
     state parse_probe {
         packet.extract(hdr.probe);
         meta.parser_metadata.remaining = hdr.probe.hop_cnt + 1;
@@ -114,23 +117,32 @@ parser MyParser(packet_in packet,
         }
     }
 
-    state parse_probe_fwd {
-        packet.extract(hdr.probe_fwd.next);
-        meta.parser_metadata.remaining = meta.parser_metadata.remaining - 1;
-        // extract the forwarding data
-        meta.egress_spec = hdr.probe_fwd.last.egress_spec;
-        transition select(meta.parser_metadata.remaining) {
-            0: accept;
-            default: parse_probe_fwd;
-        }
-    }
-
+    /* Extrai o pacote probe_data mantendo o ultimo probe_data inserido,
+     * definido através do campo bos (botton of stack). Os dados são
+     * inicializados no script send.py.  
+     */
     state parse_probe_data {
-        // probe_data e um array e o next busca o proximo elemento no header
+        // Adiciona o probe atual na próxima posição
         packet.extract(hdr.probe_data.next);
         transition select(hdr.probe_data.last.bos) {
             1: parse_probe_fwd;
             default: parse_probe_data;
+        }
+    }
+
+    /* Extrai o pacote probe_fwd até que não exista mais nenhum probe_fwd
+     * restante. O *.next utiliza a próxima posição da pilha.
+     */
+    state parse_probe_fwd {
+        // Adiciona o probe atual na próxima posição
+        packet.extract(hdr.probe_fwd.next);
+        // decrementa a quantidade de probes restantes
+        meta.parser_metadata.remaining = meta.parser_metadata.remaining - 1;
+        // atualiza o metadado com a porta de saída do hop anterior
+        meta.egress_spec = hdr.probe_fwd.last.egress_spec;
+        transition select(meta.parser_metadata.remaining) {
+            0: accept;
+            default: parse_probe_fwd;
         }
     }
 }
@@ -179,8 +191,8 @@ control MyIngress(inout headers hdr,
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
-        }
-        else if (hdr.probe.isValid()) {
+        } else if (hdr.probe.isValid()) {
+            // atualiza a porta de saida e o numero de hops
             standard_metadata.egress_spec = (bit<9>)meta.egress_spec;
             hdr.probe.hop_cnt = hdr.probe.hop_cnt + 1;
         }
@@ -228,23 +240,28 @@ control MyEgress(inout headers hdr,
             // fill out probe fields
             hdr.probe_data.push_front(1);
             hdr.probe_data[0].setValid();
+            // Seta bos=1 se for o primeiro salto
             if (hdr.probe.hop_cnt == 1) {
                 hdr.probe_data[0].bos = 1;
-            }
-            else {
+            }else {
                 hdr.probe_data[0].bos = 0;
             }
             // set switch ID field
             swid.apply();
-            // TODO: fill out the rest of the probe packet fields
+
+            // porta de saida do pacote no sw
             hdr.probe_data[0].port = (bit<8>)standard_metadata.egress_port;
+            // qtd de bytes trafegados na porta desde o ultimo pacote probe
             hdr.probe_data[0].byte_cnt = byte_cnt;
-            // Recupera o timestamp do registrador e adiciona ao probe_data
+
+            // Recupera o timestamp do último pacote probe na porta
             last_time_reg.read(last_time,(bit<32>)standard_metadata.egress_port);
+            // atualiza o probe_data com o tempo recuperado 
             hdr.probe_data[0].last_time = last_time;
            
             // Atualiza o timestamp do reg com o tempo atual 
             last_time_reg.write((bit<32>)standard_metadata.egress_port,cur_time); 
+            // atualiza o probe_data com o tempo atual
             hdr.probe_data[0].cur_time = cur_time;
         }
     }
