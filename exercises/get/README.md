@@ -1,6 +1,4 @@
-P4_16
-
-P4 Get
+# P4 Get
 
 Modificacao do programa P4Calc disponibilizado nas documentacoes do git do P4.org, para testar a recuperacao das informacoes de statament_metadata.
 
