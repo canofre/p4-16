@@ -21,17 +21,18 @@ O header do protocolo ficou montado como segue:
        +----------------+----------------+----------------+---------------+
                
 P is an ASCII Letter 'C' (0x64)
-Op is an operation to Perform:
-  '0' = ingress_port
-  '1' = egress_port
-  '2' = packet_lenght
-  '3' = enq_timestamp
-  '4' = enq_qdepth 
-  '5' = ing_global_tmp
-  '6' = eg_global_tmp 
 
-The device receives a packet, performs the requested operation, fills in the result and sends the packet back out of the same port it came in on, while 
-swapping the source and destination addresses.
+Op is an operation to Perform:
+* '0' = ingress_port
+* '1' = egress_port
+* '2' = packet_lenght
+* '3' = ing_global_tmp
+* '5' = eg_global_tmp    -> egress
+* '6' = enq_timestamp    -> egress
+* '7' = enq_qdepth       -> egress
+* '8' = deq_timedelta    -> egress
+* '9' = deq_qdepth       -> egress
+
+The device receives a packet, performs the requested operation, fills in the result and sends the packet back out of the same port it came in on, while swapping the source and destination addresses.
 
 If an unknown operation is specified or the header is not valid, the packet is dropped 
-
