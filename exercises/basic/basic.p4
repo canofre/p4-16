@@ -179,7 +179,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
               hdr.ipv4.ttl,
               hdr.ipv4.protocol,
               hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr },should 
+              hdr.ipv4.dstAddr }, 
             hdr.ipv4.hdrChecksum,
             HashAlgorithm.csum16);
     }
