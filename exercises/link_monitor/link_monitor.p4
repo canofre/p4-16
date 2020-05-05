@@ -104,9 +104,10 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ipv4);
         transition accept;
     }
-    /* O parser percorre até o primeiro elemento da pilha, porque a cada salto
-     * um novo hop é inseriro na posição 0 (zero). No egress, a pilha é movida
-     * uma posição. Se for o primeiro hop passa para o parser_prob_fwd.
+    
+    /* Atualiza o numero de saltos no metadado, incluindo o salto atual.
+     * Se for o primero switch (hop_cnt == 0 ) vai para o parse_probe_fwd.
+     * caso contrário vai para o parse_prove_data.
      */
     state parse_probe {
         packet.extract(hdr.probe);
@@ -117,12 +118,8 @@ parser MyParser(packet_in packet,
         }
     }
 
-    /* Extrai o pacote probe_data mantendo o ultimo probe_data inserido,
-     * definido através do campo bos (botton of stack). Os dados são
-     * inicializados no script send.py.  
-     */
+    
     state parse_probe_data {
-        // Adiciona o probe atual na próxima posição
         packet.extract(hdr.probe_data.next);
         transition select(hdr.probe_data.last.bos) {
             1: parse_probe_fwd;
@@ -130,15 +127,10 @@ parser MyParser(packet_in packet,
         }
     }
 
-    /* Extrai o pacote probe_fwd até que não exista mais nenhum probe_fwd
-     * restante. O *.next utiliza a próxima posição da pilha.
-     */
+    
     state parse_probe_fwd {
-        // Adiciona o probe atual na próxima posição
         packet.extract(hdr.probe_fwd.next);
-        // decrementa a quantidade de probes restantes
         meta.parser_metadata.remaining = meta.parser_metadata.remaining - 1;
-        // atualiza o metadado com a porta de saída do hop anterior
         meta.egress_spec = hdr.probe_fwd.last.egress_spec;
         transition select(meta.parser_metadata.remaining) {
             0: accept;
