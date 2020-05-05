@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<16> TYPE_SRCROUTING = 0x1234;
+const bit<16> TYPE_SRCR = 0x1234;
 
 #define MAX_HOPS 9
 
@@ -26,6 +26,11 @@ header srcRoute_t {
     bit<15>   port;
 }
 
+/*
+header srcData_t {
+    bit<8>    data;
+}
+*/
 header ipv4_t {
     bit<4>    version;
     bit<4>    ihl;
@@ -48,6 +53,7 @@ struct metadata {
 struct headers {
     ethernet_t              ethernet;
     srcRoute_t[MAX_HOPS]    srcRoutes;
+    //srcData_t[MAX_HOPS]     srcData;
     ipv4_t                  ipv4;
 }
 
@@ -58,7 +64,7 @@ struct headers {
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
-                inout standard_metadata_t standard_metadata) {
+                inout standard_metadata_t smt) {
 
     
     state start {
@@ -67,21 +73,19 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        /*
-         * TODO: Modify the next line to select on hdr.ethernet.etherType
-         * If the value is TYPE_SRCROUTING transition to parse_srcRouting
-         * otherwise transition to accept.
-         */
-        transition accept;
+        transition select(hdr.ethernet.etherType){
+            TYPE_SRCR: parse_srcRouting;
+            //TYPE_IPV4: parse_ipv4;
+            default : accept;
+        }
     }
 
     state parse_srcRouting {
-        /*
-         * TODO: extract the next entry of hdr.srcRoutes
-         * while hdr.srcRoutes.last.bos is 0 transition to this state
-         * otherwise parse ipv4
-         */
-        transition accept;
+        packet.extract(hdr.srcRoutes.next);
+        transition select(hdr.srcRoutes.last.bos) {
+            1:parse_ipv4;
+            default: parse_srcRouting;
+        }
     }
 
     state parse_ipv4 {
@@ -107,20 +111,24 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr,
                   inout metadata meta,
-                  inout standard_metadata_t standard_metadata) {
+                  inout standard_metadata_t smt) {
 
     action drop() {
-        mark_to_drop(standard_metadata);
+        mark_to_drop(smt);
     }
     
     action srcRoute_nhop() {
-        /*
-         * TODO: set standard_metadata.egress_spec 
-         * to the port in hdr.srcRoutes[0] and
-         * pop an entry from hdr.srcRoutes
-         */
+         smt.egress_spec = (bit<9>)hdr.srcRoutes[0].port;
+         // Remove o primeiro elemento por isso não zera o bos 
+         hdr.srcRoutes.pop_front(1);
     }
-
+    /*
+    action srcRoute_data(){
+        hdr.srcData.push_front(1);
+        hdr.srcData[0].setValid();
+        hdr.srcData[0].data = (bit<8>)smt.egress_spec;
+    }
+*/
     action srcRoute_finish() {
         hdr.ethernet.etherType = TYPE_IPV4;
     }
@@ -131,12 +139,16 @@ control MyIngress(inout headers hdr,
     
     apply {
         if (hdr.srcRoutes[0].isValid()){
-            /*
-             * TODO: add logic to:
-             * - If final srcRoutes (top of stack has bos==1):
+            /* - If final srcRoutes (top of stack has bos==1):
              *   - change etherType to IP
              * - choose next hop and remove top of srcRoutes stack
              */
+            //so o ultimo é o bos entao ele 
+            if ( hdr.srcRoutes[0].bos == 1 ) {
+                srcRoute_finish();
+            }
+            srcRoute_nhop();
+            //srcRoute_data();
 
             if (hdr.ipv4.isValid()){
                 update_ttl();
@@ -153,7 +165,7 @@ control MyIngress(inout headers hdr,
 
 control MyEgress(inout headers hdr,
                  inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
+                 inout standard_metadata_t smt) {
     apply {  }
 }
 
@@ -173,6 +185,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.srcRoutes);
+        //packet.emit(hdr.srcData);
         packet.emit(hdr.ipv4);
     }
 }
