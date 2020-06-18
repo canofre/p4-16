@@ -7,6 +7,8 @@ também alguns tutoriais e páginas de manual.
 - [Reositório p4lang](https://github.com/p4lang/)
 - [P4 Cheat Sheet](https://github.com/p4lang/tutorials/blob/master/p4-cheat-sheet.pdf)
 - [P4 Tutorial](https://github.com/p4lang/tutorials/blob/master/P4_tutorial.pdf)
+- [Open NFPSW](https://github.com/open-nfpsw): repositório de códigos open-nfpse
+- [p4pktgen](https://github.com/p4pktgen/p4pktgen): gerador de pacotes para p4
 
 ## Diretórios
 
