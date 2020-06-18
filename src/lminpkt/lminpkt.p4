@@ -2,19 +2,18 @@
 #include <core.p4>
 #include <v1model.p4>
 
-//bit<X> determina variaveis com X bits
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_IPV6 = 0x86DD;
-
-
-/*************************************************************************
-*********************** H E A D E R S  ***********************************
-*************************************************************************/
 
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t; 
 typedef bit<32> ip4Addr_t;
 
+const MAX_HOPS=10;
+
+/*************************************************************************
+*********************** H E A D E R S  ***********************************
+*************************************************************************/
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
@@ -36,52 +35,47 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
+header coletor_t {
+    bit<4>  hops;
+    bit<4>  swid;
+    bit<64> tmp;
+}
+
 struct metadata {
     /* empty */
 }
 
 struct headers {
-    ethernet_t   ethernet;
-    ipv4_t       ipv4;
+    ethernet_t          ethernet;
+    ipv4_t              ipv4;
+    coletor_t[MAX_HOPS] coletor;
 }
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
-/* A ordem de escrita dos estados do parser pode ser alterada no codigo e ele
- * continua a executar sem problemas, ou seja, nao necessita ser sequencial
-*/
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
 
-    /* a opcao transition definie a acao a ser realizada, que no caso era
-     * aceitar o pacote, mas poderia ser reject ou outro estado para o qual
-     * seja definido para ser executado no proximo passo. 
-    */
     state start {
-        // O conteúdo do parse_ethernet poderia ter sido colocado diretamente
-        // no estado inicial
-        transition parse_ethernet;
-    }
-
-    state parse_ethernet {
-        /* Extrai do paket de entrada as informacoes para a estrutura headers
-         * que contem o MAC e o IPv4
-        */
         packet.extract(hdr.ethernet);
-        /* Esse select é tipo sw-case, retornando o etherType e comparando com
-         * as opções existentes, passando para o parser que corresponder
-        */
         transition select(hdr.ethernet.etherType){
-            TYPE_IPV4: parse_ipv4;
-            // ação default realizada caso não ocorra correspondência
+            //TYPE_IPV4: parse_ipv4;
+            TYPE_IPV4: parse_coletor;
             default: accept; 
-            //_: accept; //forma alternativa de definir a ação default
         }
     }
     
+    state_parse_coletor{
+		packet.extract (hdr.coletor);
+        transition select(hdr.coletor.last.hops){
+            //TYPE_IPV4: parse_ipv4;
+            TYPE_IPV4: parse_coletor;
+            default: parse_coletor; 
+
+    }
     state parse_ipv4 {
 		// Extrai do pacote de entrada o tipo ipv4 para o headers hdr
 		packet.extract (hdr.ipv4);
