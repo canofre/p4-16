@@ -16,8 +16,8 @@ def main():
                 Probe(hop_cnt=0) / \
                 ProbeFwd(egress_spec=0,fim=1) 
     
-    probe_pkt = pkt_001 
-    #probe_pkt = pkt_154
+    #probe_pkt = pkt_001 
+    probe_pkt = pkt_154
     probe_pkt.show()
     while (e.upper() != 'N' ):
         try:

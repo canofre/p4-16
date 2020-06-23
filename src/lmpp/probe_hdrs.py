@@ -1,7 +1,7 @@
 from scapy.all import *
 
 TYPE_PROBE = 0x812
-IFACE='enp8s0np0'
+IFACE='eth0'
 class Probe(Packet):
    fields_desc = [ ByteField("hop_cnt", 0)]
 
