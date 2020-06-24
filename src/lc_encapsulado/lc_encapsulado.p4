@@ -5,7 +5,6 @@
 #define MAX_HOPS 10
 
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<16> DIFF_ENC = 0x3F; //111111
 
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t; 
@@ -24,7 +23,7 @@ header ethernet_t {
 header ipv4_t {
     bit<4>    version;
     bit<4>    ihl;
-    bit<8>    diffserv;
+    bit<8>    diffServ;
     bit<16>   totalLen;
     bit<16>   identification;
     bit<3>    flags;
@@ -38,8 +37,7 @@ header ipv4_t {
 
 /*Necessario inicializar o hops coletor com zero*/
 header coletor_t {
-    bit<1>  bos;
-    bit<7>  swid;
+    bit<8>  swid;
     bit<64> info;
 }
 
@@ -51,7 +49,7 @@ struct metadata {
 struct headers {
     ethernet_t          ethernet;
     ipv4_t              ipv4;
-    coletor_t[MAX_HOPS] coletor;
+    coletor_t            coletor;
 }
 
 /*************************************************************************
@@ -72,25 +70,16 @@ parser MyParser(packet_in packet,
     
     state parse_ipv4 {
 		packet.extract (hdr.ipv4);
-		transition parse_verifica;
-	} 
-
-    state parse_vefifica {
-        transition select(hdr.ipv4.diffServ){
-            DIFF_SERV: parse_coletor;
-		    default: accept;
-        }
-	} 
-    //Necessario inicializar o coletor com 1 no pacote
-    state parse_coletor{
-		packet.extract (hdr.coletor.next);
-        transition select(hdr.coletor.last.bos){
-            1 : parse_coletor;
+		transition select(hdr.ipv4.diffServ)
+            200: parse_coletor;
             default: accept;
         }
-    }
-    
+	} 
 
+    state parse_coletor{
+		packet.extract (hdr.coletor);
+        transition accept;
+    }
 }
 
 
@@ -149,8 +138,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t smt) {
     
     bit<48> diftmp = smt.egress_global_timestamp - smt.ingress_global_timestamp;
-    action set_swid(bit<7> swid){
-        hdr.coletor[0].swid = swid;
+    action set_swid(bit<8> swid){
+        hdr.coletor.swid = swid;
     }
 
     table swid {
@@ -162,24 +151,17 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
 
     apply {  
-        // Se for valido, atualiza e adiciona um novo
-        if (hdr.coletor[0].isValid()){
-            hdr.coletor[0].bos = 0;
-            hdr.coletor.push_front(1);
-            hdr.coletor[0].setValid();
-            hdr.coletor[0].bos = 1;
-            hdr.coletor[0].info=(bit<64>)diftmp;
-        }else{
-        // Se for invalido adiciona um novo    
-            hdr.coletor[0].setValid();
-            hdr.coletor[0].bos = 0;
-            hdr.coletor[0].info=(bit<64>)diftmp;
-            hdr.ipv4.diffServ=DIFF_SERV;
-        }
-        swid.apply();
-        if ( hdr.coletor[0].swid == 3 ){
-            hdr.ipv4.diffServ = 0x00;
-        }
+        //if ( hdr.ipv4.totalLen > 5000 ){
+            if ( hdr.ipv4.diffServ == 200 ){
+                hdr.ipv4.diffServ=20;
+                hdr.coletor.setInvalid();
+            }else{
+                hdr.coletor.setValid();
+                hdr.ipv4.diffServ=200;
+                hdr.coletor.info=(bit<64>)diftmp;
+                swid.apply();
+            }
+        //}
     }
 
 //    apply{}
@@ -197,7 +179,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 	        hdr.ipv4.isValid(),
             { hdr.ipv4.version,
 	          hdr.ipv4.ihl,
-              hdr.ipv4.diffserv,
+              hdr.ipv4.diffServ,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
               hdr.ipv4.flags,
