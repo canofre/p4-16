@@ -6,6 +6,7 @@
 
 const bit<16> TYPE_IPV4 = 0x800;
 
+
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t; 
 typedef bit<32> ip4Addr_t;
@@ -70,7 +71,7 @@ parser MyParser(packet_in packet,
     
     state parse_ipv4 {
 		packet.extract (hdr.ipv4);
-		transition select(hdr.ipv4.diffServ)
+		transition select(hdr.ipv4.diffServ) {
             200: parse_coletor;
             default: accept;
         }
@@ -151,7 +152,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
 
     apply {  
-        //if ( hdr.ipv4.totalLen > 5000 ){
+        if ( hdr.ipv4.totalLen > 5000 ){
             if ( hdr.ipv4.diffServ == 200 ){
                 hdr.ipv4.diffServ=20;
                 hdr.coletor.setInvalid();
@@ -161,7 +162,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
                 hdr.coletor.info=(bit<64>)diftmp;
                 swid.apply();
             }
-        //}
+        }
     }
 
 //    apply{}
