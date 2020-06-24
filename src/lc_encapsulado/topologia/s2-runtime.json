@@ -1,7 +1,7 @@
 {
   "target": "bmv2",
-  "p4info": "build/lc_encapsulado.p4.p4info.txt",
-  "bmv2_json": "build/lc_encapsulado.json",
+  "p4info": "build/lc_embeded.p4.p4info.txt",
+  "bmv2_json": "build/lc_embeded.json",
   "table_entries": [
     {
       "table": "MyEgress.swid",
