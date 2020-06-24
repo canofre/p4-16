@@ -5,7 +5,7 @@
 #define MAX_HOPS 10
 
 const bit<16> TYPE_IPV4 = 0x800;
-const bit<16> TYPE_IPV6 = 0x86DD;
+const bit<16> DIFF_ENC = 0x3F; //111111
 
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t; 
@@ -65,7 +65,6 @@ parser MyParser(packet_in packet,
     state start {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType){
-            //TYPE_IPV4: parse_coletor;
             TYPE_IPV4: parse_ipv4;
             default: accept; 
         }
@@ -73,18 +72,22 @@ parser MyParser(packet_in packet,
     
     state parse_ipv4 {
 		packet.extract (hdr.ipv4);
-		transition parse_coletor;
+		transition parse_verifica;
 	} 
 
+    state parse_vefifica {
+        transition select(hdr.ipv4.diffServ){
+            DIFF_SERV: parse_coletor;
+		    default: accept;
+        }
+	} 
     //Necessario inicializar o coletor com 1 no pacote
     state parse_coletor{
 		packet.extract (hdr.coletor.next);
-        //verify(hdp.coletor.
         transition select(hdr.coletor.last.bos){
-            0: parse_coletor;
+            1 : parse_coletor;
             default: accept;
         }
-	//	transition parse_ipv4;
     }
     
 
@@ -159,18 +162,24 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
 
     apply {  
-         if (hdr.coletor[0].isValid()){
+        // Se for valido, atualiza e adiciona um novo
+        if (hdr.coletor[0].isValid()){
             hdr.coletor[0].bos = 0;
             hdr.coletor.push_front(1);
             hdr.coletor[0].setValid();
             hdr.coletor[0].bos = 1;
             hdr.coletor[0].info=(bit<64>)diftmp;
         }else{
+        // Se for invalido adiciona um novo    
             hdr.coletor[0].setValid();
-            hdr.coletor[0].bos = 1;
+            hdr.coletor[0].bos = 0;
             hdr.coletor[0].info=(bit<64>)diftmp;
+            hdr.ipv4.diffServ=DIFF_SERV;
         }
         swid.apply();
+        if ( hdr.coletor[0].swid == 3 ){
+            hdr.ipv4.diffServ = 0x00;
+        }
     }
 
 //    apply{}
