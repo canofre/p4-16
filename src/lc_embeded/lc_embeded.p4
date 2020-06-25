@@ -34,7 +34,9 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
-/*Necessario inicializar o hops coletor com zero*/
+// (?): utilização de array com uma topologia com mais de dois switches e
+// avaliar o tamanho do pacote inicializado. 
+// (?): como verificar os dados do pacote nas portas do sw
 header coletor_t {
     bit<8>  swid;
     bit<64> info;
@@ -131,7 +133,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 ****************  E G R E S S   P R O C E S S I N G   **************************
 *******************************************************************************/
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t smt) {
-    
+    //(?): tomada de alguma decisao com as informacoes coletadas
+    //(?): quais informacoes coletar
     bit<48> diftmp = smt.egress_global_timestamp - smt.ingress_global_timestamp;
     action set_swid(bit<8> swid){
         hdr.coletor.swid = swid;
