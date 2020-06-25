@@ -6,8 +6,6 @@
 
 const bit<16> TYPE_IPV4 = 0x800;
 
-
-typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t; 
 typedef bit<32> ip4Addr_t;
 
@@ -74,7 +72,7 @@ parser MyParser(packet_in packet,
 		transition select(hdr.ipv4.diffServ) {
             200: parse_coletor;
             default: accept;
-        }
+       }
 	} 
 
     state parse_coletor{
@@ -102,14 +100,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         mark_to_drop(smt);
     }
     
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    action ipv4_forward(macAddr_t dstAddr, bit<9> port) {
         smt.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
-    
-
     
     table ipv4_lpm {
         key = {
@@ -121,12 +117,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             NoAction;
         }
         size = 1024;
-        // Acao realizada caso nao seja encontrada correspondencia na tabela.
         default_action = NoAction();
     }
 
     apply {
-        // Executa/aplica/chama a tabela ipv4_lpm se dor um ipv4 valido
         if ( hdr.ipv4.isValid() ){
             ipv4_lpm.apply();   
         }
@@ -151,29 +145,25 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
         default_action = NoAction();
     }
 
-    apply {  
-        if ( hdr.ipv4.totalLen > 5000 ){
-            if ( hdr.ipv4.diffServ == 200 ){
-                hdr.ipv4.diffServ=20;
-                hdr.coletor.setInvalid();
-            }else{
-                hdr.coletor.setValid();
-                hdr.ipv4.diffServ=200;
-                hdr.coletor.info=(bit<64>)diftmp;
-                swid.apply();
-            }
+    apply {
+        //encapsula o pacote na entrada e remove na saida
+        if ( hdr.ipv4.diffServ == 200 ){
+            hdr.ipv4.diffServ=20;
+            hdr.coletor.setInvalid();
+            hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
+        }else{
+            hdr.ipv4.ttl = hdr.ipv4.ttl - 20;                
+            hdr.coletor.setValid();
+            hdr.ipv4.diffServ=200;
+            hdr.coletor.info=(bit<64>)diftmp;
+            swid.apply();
         }
     }
-
-//    apply{}
 }
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
-/* Bloco para verificação do hash do pacote. Utiliza a função update_checksum
- * definida em v1model.
-*/
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
 	    update_checksum(
@@ -198,10 +188,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 /*************************************************************************
 ***********************  D E P A R S E R  *******************************
 *************************************************************************/
-// Remonta e despacha o pacote
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        // Escreve os cabeçalhos no pacote de saída
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.coletor);
