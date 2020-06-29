@@ -45,6 +45,7 @@ header coletor_t {
 struct metadata {
     /* empty */
     bit<32> cont;
+    bit<2> emcap;
 }
 
 struct headers {
@@ -102,8 +103,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         mark_to_drop(smt);
     }
     
-    action ipv4_forward(macAddr_t dstAddr, bit<9> port) {
+    action ipv4_forward(macAddr_t dstAddr, bit<9> port,bit<2> emcap) {
         smt.egress_spec = port;
+        meta.emcap = emcap;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
@@ -149,18 +151,33 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
 
     apply {
-        //encapsula o pacote na entrada e remove na saida
-        if ( hdr.ipv4.diffServ == 200 ){
+        if ( meta.emcap == 1 ){
+            //encapsula o pacote na entrada e remove na saida
+            if ( hdr.ipv4.diffServ == 200 ){
+                hdr.ipv4.diffServ=20;
+                hdr.coletor.setInvalid();
+                hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
+            }else{
+                hdr.ipv4.ttl = hdr.ipv4.ttl - 20;                
+                hdr.coletor.setValid();
+                hdr.ipv4.diffServ=200;
+                hdr.coletor.info=(bit<64>)diftmp;
+                swid.apply();
+            }
+        }
+        //TODO: usar o emcap para definir em quais switches será encapsulado e
+        //em qual sera desencapsulado podendo utilizar o array e verificar o
+        //tamanho
+        /*
+        if ( meta.emcap == 1 ) { 
+            emcapsula 
+        }else if ( meta.emcap == 0 ) {
             hdr.ipv4.diffServ=20;
             hdr.coletor.setInvalid();
-            hdr.ipv4.ttl = hdr.ipv4.ttl - 10;
-        }else{
-            hdr.ipv4.ttl = hdr.ipv4.ttl - 20;                
-            hdr.coletor.setValid();
-            hdr.ipv4.diffServ=200;
-            hdr.coletor.info=(bit<64>)diftmp;
-            swid.apply();
         }
+        */
+
+            
     }
 }
 
