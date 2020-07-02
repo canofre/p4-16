@@ -18,7 +18,7 @@
       "action_params": {
         "dstAddr": "08:00:00:00:01:11",
         "port": 1,
-        "num_r": 0
+        "num_r": 10
       }
     },
     {

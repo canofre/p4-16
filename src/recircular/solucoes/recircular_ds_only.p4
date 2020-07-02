@@ -33,10 +33,6 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
-header recircular_t{
-    bit<8> count;
-}
-
 struct metadata {
     bit<8> num_r;    //numero de recirculacoes
 }
@@ -44,7 +40,6 @@ struct metadata {
 struct headers {
     ethernet_t          ethernet;
     ipv4_t              ipv4;
-    recircular_t        r;
 }
 
 /*************************************************************************
@@ -62,19 +57,11 @@ parser MyParser(packet_in packet,
             default: accept; 
         }
     }
-
+    
     state parse_ipv4 {
-        packet.extract (hdr.ipv4);
-        transition select(hdr.ipv4.diffServ) {
-            200: parse_recircular;
-            default: accept;
-        }
-    } 
-
-    state parse_recircular{
-        packet.extract(hdr.r);
+		packet.extract (hdr.ipv4);
         transition accept;
-    }
+	} 
 }
 
 
@@ -132,19 +119,14 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 
     apply {
         if ( meta.num_r > 0 ){
-            if ( hdr.ipv4.diffServ == 200 ){
-                if ( hdr.r.count > 0 ){    //ja ta rodando
-                    hdr.r.count = hdr.r.count - 1;
-                    recirculate(smt);
-                }else if ( hdr.r.count == 0 ){  //finaliza
-                    hdr.r.setInvalid();
-                    hdr.ipv4.diffServ=20;
-                }
-            } else {// pacote novo
-                hdr.r.setValid();
-                hdr.ipv4.diffServ=200;
-                hdr.r.count = meta.num_r;
+            if ( hdr.ipv4.diffServ < 200 ){
+                hdr.ipv4.diffServ=200+meta.num_r-1;
                 recirculate(smt);
+            }else if ( hdr.ipv4.diffServ > 200 ){
+                hdr.ipv4.diffServ=hdr.ipv4.diffServ-1;
+                recirculate(smt);
+            }else if (hdr.ipv4.diffServ == 200 ) {
+                hdr.ipv4.diffServ=20;
             }
         }
     }
@@ -181,7 +163,6 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
-        packet.emit(hdr.r);
     }
 }
 
