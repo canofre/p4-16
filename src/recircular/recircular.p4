@@ -143,7 +143,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
             } else {// pacote novo
                 hdr.r.setValid();
                 hdr.ipv4.diffServ=200;
-                hdr.r.count = meta.num_r;
+                hdr.r.count = meta.num_r -1;
                 recirculate(smt);
             }
         }
