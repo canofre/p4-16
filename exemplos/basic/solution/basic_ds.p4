@@ -4,33 +4,25 @@
 
 const bit<16> TYPE_IPV4 = 0x800;
 
+/* TODO: typedef type MAC, IP and header*/
+
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
-
-typedef bit<9>  egressSpec_t;
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
-
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48>     dstAddr;
+    bit<48>     srcAddr;
+    bit<16>     etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>      version;
+    bit<8>      diffserv;
+    /* ..... */
+    bit<8>      ttl;
+    /* ..... */
+    bit<32>   srcAddr;
+    bit<32>   dstAddr;
 }
 
 struct metadata {
@@ -43,13 +35,12 @@ struct headers {
 }
 
 /*************************************************************************
-*********************** P A R S E R  ***********************************
+********************* A N A L I S A D O R ********************************
 *************************************************************************/
-
-parser MyParser(packet_in packet,
+parser analisador(packet_in packet, 
                 out headers hdr,
                 inout metadata meta,
-                inout standard_metadata_t standard_metadata) {
+                inout standard_metadata_t smt) {
 
     state start {
         /* TODO: add parser logic */
