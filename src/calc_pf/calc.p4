@@ -90,8 +90,8 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
     bit<32> tmp;
 	//			  |       |       |       |      |
-    bit<32> a = 0b00000000000000110101000000000000; //3.5
-	bit<32> b = 0b00000000000000100101000000000000; //2.5
+	bit<32> a = 0b00000000000000101000000000000000; //2.5
+    bit<32> b = 0b00000000000000111000000000000000; //3.5
 	
     action send_back(bit<32> result) {
         bit<48> tmp_mac;
@@ -118,23 +118,22 @@ control MyIngress(inout headers hdr,
     
     action operation_mult() {
 		//Sem scaling up
-        //tmp =(a  * b) / (1 << 8);
-		//tmp = (bit<32>)(((bit<64>)a  * (bit<64>)b) / (1 << 16));
+        tmp =(a  * b) / (1 << 8);
 		
-		//Com scaling up
-		bit<32> a2 = a << 16;
-		bit<32> b2 = b << 16;
-        hdr.p4calc.var1 = a2;
-        hdr.p4calc.var2 = b2;
+		//Com scaling up - sempre ZERO
+		//bit<32> a2 = a << 8;
+		//bit<32> b2 = b << 8;
+        //hdr.p4calc.var1 = a2;
+        //hdr.p4calc.var2 = b2;
+        //tmp =(bit<32>) ( ((bit<64>)a2  * (bit<64>)b2)  / (1 << 16));
+        //tmp =(a2  * b2);
 
-        tmp =(bit<32>) ( ((bit<64>)a2  * (bit<64>)b2)  / (1 << 16));
-        //tmp =(a2  * b2) / (1<< 8);
-		
         send_back(tmp);
     }
     
     action operation_div() {
         tmp = 0b00000000000000110101000000000000;
+		//tmp = ((a/b )*(1 << 16));
         send_back(tmp);
     }
 
