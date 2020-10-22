@@ -7,10 +7,7 @@ import random
 import struct
 import re
 
-from scapy.all import sendp, send, srp1
-from scapy.all import Packet, hexdump
-from scapy.all import Ether, StrFixedLenField, XByteField, IntField
-from scapy.all import bind_layers
+from scapy.all import *
 import readline
 
 class P4calc(Packet):
@@ -19,9 +16,12 @@ class P4calc(Packet):
                     StrFixedLenField("Four", "4", length=1),
                     XByteField("version", 0x01),
                     StrFixedLenField("op", "+", length=1),
-                    IntField("operand_a", 0),
-                    IntField("operand_b", 0),
-                    IntField("result", 0xDEADBABE)]
+                    #BitField("operand_a",0, 64),
+                    #BitField("operand_b",0, 64),
+                    #BitField("result",0,64)]
+                    IEEEFloatField("operand_a", 0),
+                    IEEEFloatField("operand_b", 0),
+                    IEEEFloatField("result",0)]
 
 bind_layers(Ether, P4calc, type=0x1234)
 
@@ -33,17 +33,18 @@ def main(args):
 
 
     iface = 'eth0'
-    v1=10
-    v2=10
-    op='+'
-    print "Operacao",int(sys.argv[1]), str(sys.argv[2]), int(sys.argv[3])
+    
+    
  
     pkt= Ether(dst='00:04:00:00:00:00', type=0x1234) / P4calc(op=sys.argv[2],
-		operand_a=int(sys.argv[1]),operand_b=int(sys.argv[3]))
+		operand_a=float(sys.argv[1]),operand_b=float(sys.argv[3]))
     pkt = pkt/' '
    
     pkt.show()
-    resp = srp1(pkt, iface=iface, timeout=1, verbose=False)
+    resp = srp1(pkt, iface=iface, timeout=10, verbose=False)
+    print "======================="
+    print "Operacao",float(sys.argv[1]), str(sys.argv[2]), float(sys.argv[3])
+    resp.show()
     if resp:
         p4calc=resp[P4calc]
         if p4calc:

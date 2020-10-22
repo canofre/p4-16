@@ -57,15 +57,14 @@ header ethernet_t {
  * This is a custom protocol header for the calculator. We'll use 
  * etherType 0x1234 for it (see parser)
  */
-const bit<16> P4CALC_ETYPE = 0x1234;
-const bit<8>  P4CALC_P     = 0x50;   // 'P'
-const bit<8>  P4CALC_4     = 0x34;   // '4'
-const bit<8>  P4CALC_VER   = 0x01;   // v0.1
-const bit<8>  P4CALC_PLUS  = 0x2b;   // '+'
-const bit<8>  P4CALC_MINUS = 0x2d;   // '-'
-const bit<8>  P4CALC_AND   = 0x26;   // '&'
-const bit<8>  P4CALC_OR    = 0x7c;   // '|'
-const bit<8>  P4CALC_CARET = 0x5e;   // '^' Exponencial
+const bit<16> P4CALC_ETYPE  = 0x1234;
+const bit<8>  P4CALC_P      = 0x50;   // 'P'
+const bit<8>  P4CALC_4      = 0x34;   // '4'
+const bit<8>  P4CALC_VER    = 0x01;   // v0.1
+const bit<8>  P4CALC_ADD    = 0x2b;   // '+'
+const bit<8>  P4CALC_SUB    = 0x2d;   // '-'
+const bit<8>  P4CALC_MULT   = 0x2a;   // '*'
+const bit<8>  P4CALC_DIV    = 0x2f;   // '/'
 
 /* TODO
  * fill p4calc_t header with P, four, ver, op, operand_a, operand_b, and res
@@ -76,10 +75,10 @@ header p4calc_t {
     bit<8>  four;   //    
     bit<8>  ver;    //
     bit<8>  op;     // 
-    bit<32> var1;   // valor 1   
-    bit<32> var2;   // valor 2
-    bit<32> res;    // resultado
-}
+    bit<64> var1;   // valor 1   
+    bit<64> var2;   // valor 2
+    bit<64> res;    // resultado
+} //224 -
 
 /*
  * All headers, used in the program needs to be assembled into a single struct.
@@ -150,18 +149,11 @@ control MyVerifyChecksum(inout headers hdr,
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    bit<32> tmp;
-    action send_back(bit<32> result) {
-        /* TODO
-         * - put the result back in hdr.p4calc.res
-         * - swap MAC addresses in hdr.ethernet.dstAddr and
-         *   hdr.ethernet.srcAddr using a temp variable
-         * - Send the packet back to the port it came from
-             by saving standard_metadata.ingress_port into
-             standard_metadata.egress_spec
-         */
+    bit<64> tmp;
+    action send_back(bit<64> result) {
         bit<48> tmp_mac;
         hdr.p4calc.res = result;
+        hdr.p4calc.p=0x51;
         tmp_mac = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr; 
         hdr.ethernet.srcAddr = tmp_mac;
@@ -174,36 +166,27 @@ control MyIngress(inout headers hdr,
     action operation_add() {
         tmp = hdr.p4calc.var1 + hdr.p4calc.var2;
         send_back(tmp);
-        /* TODO call send_back with operand_a + operand_b */
     }
     
     action operation_sub() {
         tmp = hdr.p4calc.var1 - hdr.p4calc.var2;
         send_back(tmp);
-        /* TODO call send_back with operand_a - operand_b */
     }
     
-    action operation_and() {
-        tmp = hdr.p4calc.var1 & hdr.p4calc.var2;
+    action operation_mult() {
+        tmp = hdr.p4calc.var1;
         send_back(tmp);
-        /* TODO call send_back with operand_a & operand_b */
     }
     
-    action operation_or() {
-        tmp = hdr.p4calc.var1 | hdr.p4calc.var2;
+    action operation_div() {
+        tmp = hdr.p4calc.var2;
         send_back(tmp);
-        /* TODO call send_back with operand_a | operand_b */
-    }
-
-    action operation_xor() {
-        tmp = hdr.p4calc.var1 ^ hdr.p4calc.var2;
-        send_back(tmp);
-        /* TODO call send_back with operand_a ^ operand_b */
     }
 
     action operation_drop() {
         mark_to_drop(standard_metadata);
     }
+
     
     table calculate {
         key = {
@@ -212,18 +195,17 @@ control MyIngress(inout headers hdr,
         actions = {
             operation_add;
             operation_sub;
-            operation_and;
-            operation_or;
-            operation_xor;
+            operation_mult;
+            operation_div;
             operation_drop;
         }
         const default_action = operation_drop();
         const entries = {
-            P4CALC_PLUS : operation_add();
-            P4CALC_MINUS: operation_sub();
-            P4CALC_AND  : operation_and();
-            P4CALC_OR   : operation_or();
-            P4CALC_CARET: operation_xor();
+            P4CALC_ADD  : operation_add();
+            P4CALC_SUB  : operation_sub();
+            P4CALC_MULT : operation_mult();
+            P4CALC_DIV  : operation_div();
+            
         }
     }
             

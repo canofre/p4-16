@@ -20,13 +20,10 @@ tables {
     id: 16838158
   }
   action_refs {
-    id: 16807127
+    id: 16801288
   }
   action_refs {
-    id: 16815851
-  }
-  action_refs {
-    id: 16797152
+    id: 16789714
   }
   action_refs {
     id: 16786411
@@ -51,23 +48,16 @@ actions {
 }
 actions {
   preamble {
-    id: 16807127
-    name: "MyIngress.operation_and"
-    alias: "operation_and"
+    id: 16801288
+    name: "MyIngress.operation_mult"
+    alias: "operation_mult"
   }
 }
 actions {
   preamble {
-    id: 16815851
-    name: "MyIngress.operation_or"
-    alias: "operation_or"
-  }
-}
-actions {
-  preamble {
-    id: 16797152
-    name: "MyIngress.operation_xor"
-    alias: "operation_xor"
+    id: 16789714
+    name: "MyIngress.operation_div"
+    alias: "operation_div"
   }
 }
 actions {

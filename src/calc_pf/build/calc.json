@@ -4,9 +4,9 @@
       "name" : "scalars_0",
       "id" : 0,
       "fields" : [
-        ["tmp_3", 128, false],
-        ["tmp_4", 128, false],
-        ["tmp_5", 128, false],
+        ["tmp_3", 224, false],
+        ["tmp_4", 224, false],
+        ["tmp_5", 224, false],
         ["tmp_2", 8, false],
         ["tmp_6", 8, false],
         ["tmp_7", 8, false],
@@ -21,9 +21,9 @@
         ["four", 8, false],
         ["ver", 8, false],
         ["op", 8, false],
-        ["var1", 32, false],
-        ["var2", 32, false],
-        ["res", 32, false]
+        ["var1", 64, false],
+        ["var2", 64, false],
+        ["res", 64, false]
       ]
     },
     {
@@ -182,7 +182,7 @@
                 },
                 {
                   "type" : "lookahead",
-                  "value" : [0, 128]
+                  "value" : [0, 224]
                 }
               ],
               "op" : "set"
@@ -227,13 +227,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x78"
+                                "value" : "0xd8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -273,13 +273,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x70"
+                                "value" : "0xd0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -319,13 +319,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x68"
+                                "value" : "0xc8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -365,13 +365,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x60"
+                                "value" : "0xc0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -411,19 +411,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x40"
+                                "value" : "0x80"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -457,19 +457,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x20"
+                                "value" : "0x40"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -495,7 +495,7 @@
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -511,7 +511,7 @@
                 },
                 {
                   "type" : "lookahead",
-                  "value" : [0, 128]
+                  "value" : [0, 224]
                 }
               ],
               "op" : "set"
@@ -556,13 +556,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x78"
+                                "value" : "0xd8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -602,13 +602,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x70"
+                                "value" : "0xd0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -648,13 +648,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x68"
+                                "value" : "0xc8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -694,13 +694,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x60"
+                                "value" : "0xc0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -740,19 +740,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x40"
+                                "value" : "0x80"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -786,19 +786,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x20"
+                                "value" : "0x40"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -824,7 +824,7 @@
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -840,7 +840,7 @@
                 },
                 {
                   "type" : "lookahead",
-                  "value" : [0, 128]
+                  "value" : [0, 224]
                 }
               ],
               "op" : "set"
@@ -885,13 +885,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x78"
+                                "value" : "0xd8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -931,13 +931,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x70"
+                                "value" : "0xd0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -977,13 +977,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x68"
+                                "value" : "0xc8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -1023,13 +1023,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x60"
+                                "value" : "0xc0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -1069,19 +1069,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x40"
+                                "value" : "0x80"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -1115,19 +1115,19 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x20"
+                                "value" : "0x40"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -1153,7 +1153,7 @@
                       },
                       "right" : {
                         "type" : "hexstr",
-                        "value" : "0xffffffff"
+                        "value" : "0xffffffffffffffff"
                       }
                     }
                   }
@@ -1187,13 +1187,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x78"
+                                "value" : "0xd8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -1233,13 +1233,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x70"
+                                "value" : "0xd0"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -1279,13 +1279,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x68"
+                                "value" : "0xc8"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -1361,7 +1361,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "calc.p4",
-        "line" : 259,
+        "line" : 241,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -1408,7 +1408,7 @@
                   },
                   "right" : {
                     "type" : "hexstr",
-                    "value" : "0xffffffff"
+                    "value" : "0xffffffffffffffff"
                   }
                 }
               }
@@ -1416,9 +1416,28 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 164,
+            "line" : 155,
             "column" : 8,
             "source_fragment" : "hdr.p4calc.res = result; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["p4calc", "p"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x51"
+            }
+          ],
+          "source_info" : {
+            "filename" : "calc.p4",
+            "line" : 156,
+            "column" : 8,
+            "source_fragment" : "hdr.p4calc.p=0x51"
           }
         },
         {
@@ -1435,7 +1454,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 165,
+            "line" : 157,
             "column" : 8,
             "source_fragment" : "tmp_mac = hdr.ethernet.dstAddr"
           }
@@ -1454,7 +1473,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 166,
+            "line" : 158,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = hdr.ethernet.srcAddr"
           }
@@ -1473,7 +1492,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 167,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = tmp_mac"
           }
@@ -1492,7 +1511,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 169,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = standard_metadata.ingress_port"
           }
@@ -1533,7 +1552,7 @@
                   },
                   "right" : {
                     "type" : "hexstr",
-                    "value" : "0xffffffff"
+                    "value" : "0xffffffffffffffff"
                   }
                 }
               }
@@ -1541,9 +1560,28 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 164,
+            "line" : 155,
             "column" : 8,
             "source_fragment" : "hdr.p4calc.res = result; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["p4calc", "p"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x51"
+            }
+          ],
+          "source_info" : {
+            "filename" : "calc.p4",
+            "line" : 156,
+            "column" : 8,
+            "source_fragment" : "hdr.p4calc.p=0x51"
           }
         },
         {
@@ -1560,7 +1598,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 165,
+            "line" : 157,
             "column" : 8,
             "source_fragment" : "tmp_mac = hdr.ethernet.dstAddr"
           }
@@ -1579,7 +1617,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 166,
+            "line" : 158,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = hdr.ethernet.srcAddr"
           }
@@ -1598,7 +1636,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 167,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = tmp_mac"
           }
@@ -1617,7 +1655,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 169,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = standard_metadata.ingress_port"
           }
@@ -1625,7 +1663,7 @@
       ]
     },
     {
-      "name" : "MyIngress.operation_and",
+      "name" : "MyIngress.operation_mult",
       "id" : 2,
       "runtime_data" : [],
       "primitives" : [
@@ -1637,28 +1675,34 @@
               "value" : ["p4calc", "res"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var1"]
-                  },
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var2"]
-                  }
-                }
-              }
+              "type" : "field",
+              "value" : ["p4calc", "var1"]
             }
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 164,
+            "line" : 155,
             "column" : 8,
             "source_fragment" : "hdr.p4calc.res = result; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["p4calc", "p"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x51"
+            }
+          ],
+          "source_info" : {
+            "filename" : "calc.p4",
+            "line" : 156,
+            "column" : 8,
+            "source_fragment" : "hdr.p4calc.p=0x51"
           }
         },
         {
@@ -1675,7 +1719,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 165,
+            "line" : 157,
             "column" : 8,
             "source_fragment" : "tmp_mac = hdr.ethernet.dstAddr"
           }
@@ -1694,7 +1738,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 166,
+            "line" : 158,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = hdr.ethernet.srcAddr"
           }
@@ -1713,7 +1757,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 167,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = tmp_mac"
           }
@@ -1732,7 +1776,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 169,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = standard_metadata.ingress_port"
           }
@@ -1740,7 +1784,7 @@
       ]
     },
     {
-      "name" : "MyIngress.operation_or",
+      "name" : "MyIngress.operation_div",
       "id" : 3,
       "runtime_data" : [],
       "primitives" : [
@@ -1752,28 +1796,34 @@
               "value" : ["p4calc", "res"]
             },
             {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "|",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var1"]
-                  },
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var2"]
-                  }
-                }
-              }
+              "type" : "field",
+              "value" : ["p4calc", "var2"]
             }
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 164,
+            "line" : 155,
             "column" : 8,
             "source_fragment" : "hdr.p4calc.res = result; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["p4calc", "p"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x51"
+            }
+          ],
+          "source_info" : {
+            "filename" : "calc.p4",
+            "line" : 156,
+            "column" : 8,
+            "source_fragment" : "hdr.p4calc.p=0x51"
           }
         },
         {
@@ -1790,7 +1840,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 165,
+            "line" : 157,
             "column" : 8,
             "source_fragment" : "tmp_mac = hdr.ethernet.dstAddr"
           }
@@ -1809,7 +1859,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 166,
+            "line" : 158,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = hdr.ethernet.srcAddr"
           }
@@ -1828,7 +1878,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 167,
+            "line" : 159,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = tmp_mac"
           }
@@ -1847,7 +1897,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 169,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = standard_metadata.ingress_port"
           }
@@ -1855,116 +1905,23 @@
       ]
     },
     {
-      "name" : "MyIngress.operation_xor",
+      "name" : "MyIngress.operation_drop",
       "id" : 4,
       "runtime_data" : [],
       "primitives" : [
         {
-          "op" : "assign",
+          "op" : "mark_to_drop",
           "parameters" : [
             {
-              "type" : "field",
-              "value" : ["p4calc", "res"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "^",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var1"]
-                  },
-                  "right" : {
-                    "type" : "field",
-                    "value" : ["p4calc", "var2"]
-                  }
-                }
-              }
+              "type" : "header",
+              "value" : "standard_metadata"
             }
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 164,
+            "line" : 187,
             "column" : 8,
-            "source_fragment" : "hdr.p4calc.res = result; ..."
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_mac_0"]
-            },
-            {
-              "type" : "field",
-              "value" : ["ethernet", "dstAddr"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "calc.p4",
-            "line" : 165,
-            "column" : 8,
-            "source_fragment" : "tmp_mac = hdr.ethernet.dstAddr"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ethernet", "dstAddr"]
-            },
-            {
-              "type" : "field",
-              "value" : ["ethernet", "srcAddr"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "calc.p4",
-            "line" : 166,
-            "column" : 8,
-            "source_fragment" : "hdr.ethernet.dstAddr = hdr.ethernet.srcAddr"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ethernet", "srcAddr"]
-            },
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_mac_0"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "calc.p4",
-            "line" : 167,
-            "column" : 8,
-            "source_fragment" : "hdr.ethernet.srcAddr = tmp_mac"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "ingress_port"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "calc.p4",
-            "line" : 169,
-            "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = standard_metadata.ingress_port"
+            "source_fragment" : "mark_to_drop(standard_metadata)"
           }
         }
       ]
@@ -1984,29 +1941,7 @@
           ],
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 205,
-            "column" : 8,
-            "source_fragment" : "mark_to_drop(standard_metadata)"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.operation_drop",
-      "id" : 6,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "mark_to_drop",
-          "parameters" : [
-            {
-              "type" : "header",
-              "value" : "standard_metadata"
-            }
-          ],
-          "source_info" : {
-            "filename" : "calc.p4",
-            "line" : 205,
+            "line" : 187,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -2020,7 +1955,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "calc.p4",
-        "line" : 150,
+        "line" : 149,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -2031,7 +1966,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 208,
+            "line" : 191,
             "column" : 10,
             "source_fragment" : "calculate"
           },
@@ -2049,19 +1984,18 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [0, 1, 2, 3, 4, 5],
-          "actions" : ["MyIngress.operation_add", "MyIngress.operation_sub", "MyIngress.operation_and", "MyIngress.operation_or", "MyIngress.operation_xor", "MyIngress.operation_drop"],
+          "action_ids" : [0, 1, 2, 3, 4],
+          "actions" : ["MyIngress.operation_add", "MyIngress.operation_sub", "MyIngress.operation_mult", "MyIngress.operation_div", "MyIngress.operation_drop"],
           "base_default_next" : null,
           "next_tables" : {
             "MyIngress.operation_add" : null,
             "MyIngress.operation_sub" : null,
-            "MyIngress.operation_and" : null,
-            "MyIngress.operation_or" : null,
-            "MyIngress.operation_xor" : null,
+            "MyIngress.operation_mult" : null,
+            "MyIngress.operation_div" : null,
             "MyIngress.operation_drop" : null
           },
           "default_entry" : {
-            "action_id" : 5,
+            "action_id" : 4,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -2070,9 +2004,9 @@
             {
               "source_info" : {
                 "filename" : "calc.p4",
-                "line" : 222,
+                "line" : 204,
                 "column" : 12,
-                "source_fragment" : "P4CALC_PLUS : operation_add()"
+                "source_fragment" : "P4CALC_ADD : operation_add()"
               },
               "match_key" : [
                 {
@@ -2089,9 +2023,9 @@
             {
               "source_info" : {
                 "filename" : "calc.p4",
-                "line" : 223,
+                "line" : 205,
                 "column" : 12,
-                "source_fragment" : "P4CALC_MINUS: operation_sub()"
+                "source_fragment" : "P4CALC_SUB : operation_sub()"
               },
               "match_key" : [
                 {
@@ -2108,14 +2042,14 @@
             {
               "source_info" : {
                 "filename" : "calc.p4",
-                "line" : 224,
+                "line" : 206,
                 "column" : 12,
-                "source_fragment" : "P4CALC_AND : operation_and()"
+                "source_fragment" : "P4CALC_MULT : operation_mult()"
               },
               "match_key" : [
                 {
                   "match_type" : "exact",
-                  "key" : "0x26"
+                  "key" : "0x2a"
                 }
               ],
               "action_entry" : {
@@ -2127,14 +2061,14 @@
             {
               "source_info" : {
                 "filename" : "calc.p4",
-                "line" : 225,
+                "line" : 207,
                 "column" : 12,
-                "source_fragment" : "P4CALC_OR : operation_or()"
+                "source_fragment" : "P4CALC_DIV : operation_div()"
               },
               "match_key" : [
                 {
                   "match_type" : "exact",
-                  "key" : "0x7c"
+                  "key" : "0x2f"
                 }
               ],
               "action_entry" : {
@@ -2142,25 +2076,6 @@
                 "action_data" : []
               },
               "priority" : 4
-            },
-            {
-              "source_info" : {
-                "filename" : "calc.p4",
-                "line" : 226,
-                "column" : 12,
-                "source_fragment" : "P4CALC_CARET: operation_xor()"
-              },
-              "match_key" : [
-                {
-                  "match_type" : "exact",
-                  "key" : "0x5e"
-                }
-              ],
-              "action_entry" : {
-                "action_id" : 4,
-                "action_data" : []
-              },
-              "priority" : 5
             }
           ]
         },
@@ -2169,7 +2084,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 234,
+            "line" : 216,
             "column" : 12,
             "source_fragment" : "operation_drop()"
           },
@@ -2180,14 +2095,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [6],
+          "action_ids" : [5],
           "actions" : ["MyIngress.operation_drop"],
           "base_default_next" : null,
           "next_tables" : {
             "MyIngress.operation_drop" : null
           },
           "default_entry" : {
-            "action_id" : 6,
+            "action_id" : 5,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -2201,7 +2116,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "calc.p4",
-            "line" : 231,
+            "line" : 213,
             "column" : 12,
             "source_fragment" : "hdr.p4calc.isValid()"
           },
@@ -2226,7 +2141,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "calc.p4",
-        "line" : 242,
+        "line" : 224,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
