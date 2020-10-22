@@ -16,12 +16,12 @@ class P4calc(Packet):
                     StrFixedLenField("Four", "4", length=1),
                     XByteField("version", 0x01),
                     StrFixedLenField("op", "+", length=1),
-                    #BitField("operand_a",0, 64),
-                    #BitField("operand_b",0, 64),
-                    #BitField("result",0,64)]
-                    IEEEFloatField("operand_a", 0),
-                    IEEEFloatField("operand_b", 0),
-                    IEEEFloatField("result",0)]
+                    BitField("operand_a",0, 32),
+                    BitField("operand_b",0, 32),
+                    BitField("result",0,32)]
+                    #IEEEFloatField("operand_a", 0),
+                    #IEEEFloatField("operand_b", 0),
+                    #IEEEFloatField("result",0)]
 
 bind_layers(Ether, P4calc, type=0x1234)
 
@@ -34,21 +34,21 @@ def main(args):
 
     iface = 'eth0'
     
-    
- 
+    get_bin = lambda x, n: format(x, 'b').zfill(n) 
+    print get_bin(12, 32)
     pkt= Ether(dst='00:04:00:00:00:00', type=0x1234) / P4calc(op=sys.argv[2],
-		operand_a=float(sys.argv[1]),operand_b=float(sys.argv[3]))
+		operand_a=int(sys.argv[1]),operand_b=int(sys.argv[3]))
     pkt = pkt/' '
    
     pkt.show()
-    resp = srp1(pkt, iface=iface, timeout=10, verbose=False)
+    resp = srp1(pkt, iface=iface, timeout=1, verbose=False)
     print "======================="
-    print "Operacao",float(sys.argv[1]), str(sys.argv[2]), float(sys.argv[3])
+    print "Operacao",int(sys.argv[1]), str(sys.argv[2]), int(sys.argv[3])
     resp.show()
     if resp:
         p4calc=resp[P4calc]
         if p4calc:
-            print p4calc.result
+            print get_bin(p4calc.result, 32)
         else:
             print "cannot find P4calc header in the packet"
     else:
