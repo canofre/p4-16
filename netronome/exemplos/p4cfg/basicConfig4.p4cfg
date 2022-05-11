@@ -1,0 +1,84 @@
+{
+    "tables": {
+        "ingress::ipv4_lpm": {
+            "rules": [
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p0"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "regra1", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.1.0.10"
+                        }
+                    }
+                },
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p1"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "regra2", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.2.0.10"
+                        }
+                    }
+                },
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p2"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "regra3", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.3.0.10"
+                        }
+                    }
+                },
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p3"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "regra4", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.4.0.10"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

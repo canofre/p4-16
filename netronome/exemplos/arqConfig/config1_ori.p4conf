@@ -1,0 +1,27 @@
+{
+    "tables": {
+        "ingress::ipv4_lpm": {
+            "rules": [
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p0"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "regra1", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.0.1.10"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

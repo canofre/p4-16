@@ -1,0 +1,37 @@
+{
+    "tables": {
+        "egress::swid": {}, 
+        "ingress::ipv4_lpm": {
+            "rules": [
+                {
+                    "action": {
+                        "data": {
+                            "dstAddr": {
+                                "value": "00:00:00:00:00:00"
+                            }, 
+                            "port": {
+                                "value": "p0"
+                            }, 
+                            "encap": {
+                                "value": "0"
+                            }
+                        }, 
+                        "type": "ingress::ipv4_forward"
+                    }, 
+                    "name": "rule_1", 
+                    "match": {
+                        "ipv4.dstAddr": {
+                            "value": "10.2.0.10"
+                        }
+                    }
+                } 
+            ], 
+            "default_rule": {
+                "action": {
+                    "type": "ingress::drop"
+                }, 
+                "name": "rule_default"
+            }
+        }
+    }
+}

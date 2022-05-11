@@ -1,0 +1,124 @@
+
+./build/MoonGen ./examples/netronome-packetgen/packetgen.lua -tx 0 -rx 2 --dst-ip 10.2.0.10 --dst-ip-vary 0.0.0.0 --timeout 10
+
+#### Sem interação 
++------ TX Statistics for core   1, port   0 -------------------+
+| Packets sent               :                        165829517 |
+| Packet send rate           :                             0.00 |
+| Avg packet send rate       :                      16582795.20 |
+| Bytes sent                 :                      10613089088 |
+| Byte send rate             :                             0.00 |
+| Avg byte send rate         :                    1061298892.51 |
+| Packets short              :                                0 |
+| Bursts                     :                            81011 |
++---------------------------------------------------------------+
+
++------ RX Statistics for core   2, port   2 -------------------+
+| Packets received           :                        145273182 |
+| Packet receive rate        :                             0.00 |
+| Avg packet receive rate    :                      14527312.83 |
+| Bytes received             :                       8716390920 |
+| Byte receive rate          :                             0.00 |
+| Avg byte receive rate      :                     871638769.93 |
+| Packets dropped on receive :                        145273182 |
+| RX mean latency            :                     0.0001722935 |
++---------------------------------------------------------------+
+
+#################################################################
+#### 5 por interface (T=10)
++------ TX Statistics for core   1, port   0 -------------------+
+| Packets sent               :                        161506253 |
+| Packet send rate           :                             0.00 |
+| Avg packet send rate       :                      16150563.15 |
+| Bytes sent                 :                      10336400192 |
+| Byte send rate             :                             0.00 |
+| Avg byte send rate         :                    1033636041.32 |
+| Packets short              :                                0 |
+| Bursts                     :                            78899 |
++---------------------------------------------------------------+
+
++------ RX Statistics for core   2, port   2 -------------------+
+| Packets received           :                         30269434 |
+| Packet receive rate        :                             0.00 |
+| Avg packet receive rate    :                       3026942.83 |
+| Bytes received             :                       1816166040 |
+| Byte receive rate          :                             0.00 |
+| Avg byte receive rate      :                     181616570.03 |
+| Packets dropped on receive :                         30269434 |
+| RX mean latency            :                     0.0004393649 |
++---------------------------------------------------------------+
+
+#################################################################
+#### 10 por interface (T=20)
++------ TX Statistics for core   1, port   0 -------------------+
+| Packets sent               :                        159205425 |
+| Packet send rate           :                             0.00 |
+| Avg packet send rate       :                      15920414.93 |
+| Bytes sent                 :                      10189147200 |
+| Byte send rate             :                             0.00 |
+| Avg byte send rate         :                    1018906555.35 |
+| Packets short              :                                0 |
+| Bursts                     :                            77775 |
++---------------------------------------------------------------+
+
++------ RX Statistics for core   2, port   2 -------------------+
+| Packets received           :                         17031267 |
+| Packet receive rate        :                             0.00 |
+| Avg packet receive rate    :                       1703126.17 |
+| Bytes received             :                       1021876020 |
+| Byte receive rate          :                             0.00 |
+| Avg byte receive rate      :                     102187569.97 |
+| Packets dropped on receive :                         17031267 |
+| RX mean latency            :                     0.0007241072 |
++---------------------------------------------------------------+
+
+#################################################################
+#### 25 por interface (T=50)
++------ TX Statistics for core   1, port   0 -------------------+
+| Packets sent               :                        135357875 |
+| Packet send rate           :                             0.00 |
+| Avg packet send rate       :                      13535626.11 |
+| Bytes sent                 :                       8662904000 |
+| Byte send rate             :                             0.00 |
+| Avg byte send rate         :                     866280071.22 |
+| Packets short              :                                0 |
+| Bursts                     :                            66125 |
++---------------------------------------------------------------+
+
++------ RX Statistics for core   2, port   2 -------------------+
+| Packets received           :                          6425517 |
+| Packet receive rate        :                             0.00 |
+| Avg packet receive rate    :                        642547.95 |
+| Bytes received             :                        385531020 |
+| Byte receive rate          :                             0.00 |
+| Avg byte receive rate      :                      38552877.06 |
+| Packets dropped on receive :                          6425517 |
+| RX mean latency            :                     0.0018520222 |
++---------------------------------------------------------------+
+
+
+#################################################################
+#### 50 por interface (T=100)
++------ TX Statistics for core   1, port   0 -------------------+
+| Packets sent               :                        153283454 |
+| Packet send rate           :                             0.00 |
+| Avg packet send rate       :                      15328248.79 |
+| Bytes sent                 :                       9810141056 |
+| Byte send rate             :                             0.00 |
+| Avg byte send rate         :                     981007922.58 |
+| Packets short              :                                0 |
+| Bursts                     :                            74882 |
++---------------------------------------------------------------+
+
++------ RX Statistics for core   2, port   2 -------------------+
+| Packets received           :                          3736220 |
+| Packet receive rate        :                             0.00 |
+| Avg packet receive rate    :                        373621.95 |
+| Bytes received             :                        224173200 |
+| Byte receive rate          :                             0.00 |
+| Avg byte receive rate      :                      22417317.22 |
+| Packets dropped on receive :                          3736220 |
+| RX mean latency            :                     0.0030329546 |
++---------------------------------------------------------------+
+
+

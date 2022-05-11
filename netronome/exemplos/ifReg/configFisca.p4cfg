@@ -1,0 +1,56 @@
+{
+    "tables": {
+        "ingress::ipv4_lpm": {
+            "rules": [
+                {
+                    "name": "regra_1", 
+                    "match": { "ipv4.dstAddr": { "value": "10.0.1.10" } },
+                    "action": {
+                        "type": "ingress::ipv4_forward",
+                        "data": {
+                            "dstAddr": { "value": "00:00:00:00:00:00" }, 
+                            "port": { "value": "p0" }
+                        }
+                    }
+                }, 
+                {
+                    "name": "regra_1", 
+                    "match": { "ipv4.dstAddr": { "value": "10.0.2.10" } },
+                    "action": {
+                        "type": "ingress::ipv4_forward",
+                        "data": {
+                            "dstAddr": { "value": "00:00:00:00:00:00" }, 
+                            "port": { "value": "p1" }
+                        }
+                    }
+                }, 
+                {
+                    "name": "regra_1", 
+                    "match": { "ipv4.dstAddr": { "value": "10.0.3.10" } },
+                    "action": {
+                        "type": "ingress::ipv4_forward",
+                        "data": {
+                            "dstAddr": { "value": "00:00:00:00:00:00" }, 
+                            "port": { "value": "p2" }
+                        }
+                    }
+                }, 
+                {
+                    "name": "regra_4", 
+                    "match": {"ipv4.dstAddr": { "value": "10.0.4.10" } },
+                    "action": {
+                        "type": "ingress::ipv4_forward",
+                        "data": {
+                            "dstAddr": { "value": "00:00:00:00:00:00" }, 
+                            "port": { "value": "p3" }
+                        }
+                    }
+                }
+            ], 
+            "default_rule": {
+                "name": "drop",
+                "action": { "type": "ingress::drop" }
+            }
+        }
+    }
+}
